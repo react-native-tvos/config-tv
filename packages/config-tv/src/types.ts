@@ -10,4 +10,8 @@ export type ConfigData = {
    * If true, verbose warnings will be shown during plugin execution.
    */
   showVerboseWarnings?: boolean;
+  /**
+   * If set, this will be used as the tvOS deployment target version instead of the default (13.4).
+   */
+  tvosDeploymentTarget?: string;
 };

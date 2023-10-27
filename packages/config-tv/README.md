@@ -36,7 +36,8 @@ or
         "@react-native-tvos/config-tv",
         {
           "isTV": true,
-          "showVerboseWarnings": false
+          "showVerboseWarnings": false,
+          "tvosDeploymentTarget": "13.4"
         }
       ]
     ]
@@ -50,6 +51,7 @@ _Plugin parameters_:
 
 - `isTV`: (optional boolean, default false) If true, prebuild should generate or modify Android and iOS files to build for TV (Android TV and Apple TV). If false, the default phone-appropriate files should be generated, and if existing files contain TV changes, they will be reverted. Setting the environment variable EXPO_TV to "true" or "1" will override this value and force a TV build.
 - `showVerboseWarnings`: (optional boolean, default false) If true, verbose warnings will be shown during plugin execution.
+- `tvosDeploymentTarget`: (optional string, default '13.4') Used to set the tvOS deployment target version in the Xcode project.
 
 _Warning_:
 
