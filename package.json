@@ -12,7 +12,6 @@
     "packages/*"
   ],
   "resolutions": {
-    "expo": "^50.0.0.alpha.5",
     "fs-extra": "^9.1.0"
   },
   "devDependencies": {
