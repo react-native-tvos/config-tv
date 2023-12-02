@@ -24,3 +24,7 @@ export function showVerboseWarnings(params: ConfigData): boolean {
 export function tvosDeploymentTarget(params: ConfigData): string {
   return params?.tvosDeploymentTarget ?? defaultTvosDeploymentVersion;
 }
+
+export function shouldRemoveFlipperOnAndroid(params: ConfigData): boolean {
+  return params?.removeFlipperOnAndroid ?? true;
+}
