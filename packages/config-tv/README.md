@@ -37,7 +37,8 @@ or
         {
           "isTV": true,
           "showVerboseWarnings": false,
-          "tvosDeploymentTarget": "13.4"
+          "tvosDeploymentTarget": "13.4",
+          "removeFlipperOnAndroid": true
         }
       ]
     ]
@@ -52,6 +53,7 @@ _Plugin parameters_:
 - `isTV`: (optional boolean, default false) If true, prebuild should generate or modify Android and iOS files to build for TV (Android TV and Apple TV). If false, the default phone-appropriate files should be generated, and if existing files contain TV changes, they will be reverted. Setting the environment variable EXPO_TV to "true" or "1" will override this value and force a TV build.
 - `showVerboseWarnings`: (optional boolean, default false) If true, verbose warnings will be shown during plugin execution.
 - `tvosDeploymentTarget`: (optional string, default '13.4') Used to set the tvOS deployment target version in the Xcode project.
+- `removeFlipperOnAndroid`: (optional boolean, default true) Used to remove the Flipper dependency from `MainApplication.kt` (or `MainApplication.java`) and `android/app/build.gradle`. This is necessary for React Native TV 0.73 and higher, since Flipper integration is removed from these versions. If this causes issues, set the value to false, run `prebuild --clean` again, and then remove Flipper from your Android source manually.
 
 _Warning_:
 
@@ -60,7 +62,7 @@ When this plugin is used to generate files in the iOS directory that build an Ap
 ```json
 {
   "dependencies": {
-    "react-native": "npm:react-native-tvos@^0.72.5-0"
+    "react-native": "npm:react-native-tvos@^0.72.6-1"
   }
 }
 ```
