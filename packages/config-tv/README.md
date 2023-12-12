@@ -62,7 +62,7 @@ When this plugin is used to generate files in the iOS directory that build an Ap
 ```json
 {
   "dependencies": {
-    "react-native": "npm:react-native-tvos@^0.72.6-1"
+    "react-native": "npm:react-native-tvos@^0.73.0-0"
   }
 }
 ```
