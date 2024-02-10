@@ -1,24 +1,22 @@
-import { ExpoConfig } from "expo/config";
+import { ExpoConfig } from 'expo/config';
 import {
   AndroidConfig,
   ConfigPlugin,
-  WarningAggregator,
   withAndroidManifest,
-} from "expo/config-plugins";
+} from 'expo/config-plugins';
 
-import { ConfigData } from "./types";
-import { isTVEnabled, showVerboseWarnings } from "./utils";
+import { ConfigData } from './types';
+import { isTVEnabled, verboseLog } from './utils';
 
-const pkg = require("../package.json");
+const pkg = require('../package.json');
 
 const { getMainActivity } = AndroidConfig.Manifest;
 
 export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
   config,
-  params = {}
+  params = {},
 ) => {
   const isTV = isTVEnabled(params);
-  const verbose = showVerboseWarnings(params);
 
   return withAndroidManifest(config, async (config) => {
     if (!isTV) {
@@ -28,68 +26,70 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
     config.modResults = await setLeanBackLauncherIntent(
       config,
       config.modResults,
-      verbose
+      params,
     );
     config.modResults = await removePortraitOrientation(
       config,
       config.modResults,
-      verbose
+      params,
     );
     return config;
   });
 };
 
-const LEANBACK_LAUNCHER_CATEGORY = "android.intent.category.LEANBACK_LAUNCHER";
+const LEANBACK_LAUNCHER_CATEGORY = 'android.intent.category.LEANBACK_LAUNCHER';
 
 function getMainLaunchIntent(
-  androidManifest: AndroidConfig.Manifest.AndroidManifest
+  androidManifest: AndroidConfig.Manifest.AndroidManifest,
 ) {
   const mainActivity = getMainActivity(androidManifest);
-  const intentFilters = mainActivity?.["intent-filter"];
+  const intentFilters = mainActivity?.['intent-filter'];
   const mainLaunchIntents = (intentFilters ?? []).filter((i) => {
     const action = i.action ?? [];
     if (action.length === 0) {
       return false;
     }
-    return action[0]?.$["android:name"] === "android.intent.action.MAIN";
+    return action[0]?.$['android:name'] === 'android.intent.action.MAIN';
   });
   return mainLaunchIntents.length ? mainLaunchIntents[0] : undefined;
 }
 
 function leanbackLauncherCategoryExistsInMainLaunchIntent(
-  mainLaunchIntent: AndroidConfig.Manifest.ManifestIntentFilter
+  mainLaunchIntent: AndroidConfig.Manifest.ManifestIntentFilter,
 ): boolean {
   const mainLaunchCategories = mainLaunchIntent.category ?? [];
   const mainLaunchIntentCategoriesWithLeanbackLauncher =
     mainLaunchCategories.filter(
-      (c) => c.$["android:name"] === LEANBACK_LAUNCHER_CATEGORY
+      (c) => c.$['android:name'] === LEANBACK_LAUNCHER_CATEGORY,
     );
   return mainLaunchIntentCategoriesWithLeanbackLauncher.length > 0;
 }
 
 export function setLeanBackLauncherIntent(
-  _config: Pick<ExpoConfig, "android">,
+  _config: Pick<ExpoConfig, 'android'>,
   androidManifest: AndroidConfig.Manifest.AndroidManifest,
-  verbose: boolean
+  params: ConfigData,
 ): AndroidConfig.Manifest.AndroidManifest {
   const mainLaunchIntent = getMainLaunchIntent(androidManifest);
   if (!mainLaunchIntent) {
     throw new Error(
-      `${pkg.name}@${pkg.version}: no main intent in main activity of Android manifest`
+      `${pkg.name}@${pkg.version}: no main intent in main activity of Android manifest`,
     );
   }
   if (!leanbackLauncherCategoryExistsInMainLaunchIntent(mainLaunchIntent)) {
     // Leanback needs to be added
-    if (verbose) {
-      WarningAggregator.addWarningAndroid(
-        "manifest",
-        `${pkg.name}@${pkg.version}: adding TV leanback launcher category to main intent in AndroidManifest.xml`
-      );
-    }
+    verboseLog(
+      'adding TV leanback launcher category to main intent in AndroidManifest.xml',
+      {
+        params,
+        platform: 'android',
+        property: 'manifest',
+      },
+    );
     const mainLaunchCategories = mainLaunchIntent.category ?? [];
     mainLaunchCategories.push({
       $: {
-        "android:name": LEANBACK_LAUNCHER_CATEGORY,
+        'android:name': LEANBACK_LAUNCHER_CATEGORY,
       },
     });
     mainLaunchIntent.category = mainLaunchCategories;
@@ -98,21 +98,20 @@ export function setLeanBackLauncherIntent(
 }
 
 export async function removePortraitOrientation(
-  _config: Pick<ExpoConfig, "android">,
+  _config: Pick<ExpoConfig, 'android'>,
   androidManifest: AndroidConfig.Manifest.AndroidManifest,
-  verbose: boolean
+  params: ConfigData,
 ): Promise<AndroidConfig.Manifest.AndroidManifest> {
   const mainActivity = getMainActivity(androidManifest);
   if (mainActivity?.$) {
     const metadata: typeof mainActivity.$ = mainActivity?.$ ?? {};
-    if (metadata["android:screenOrientation"]) {
-      if (verbose) {
-        WarningAggregator.addWarningAndroid(
-          "manifest",
-          `${pkg.name}@${pkg.version}: removing screen orientation from AndroidManifest.xml`
-        );
-      }
-      delete metadata["android:screenOrientation"];
+    if (metadata['android:screenOrientation']) {
+      verboseLog('removing screen orientation from AndroidManifest.xml', {
+        params,
+        platform: 'android',
+        property: 'manifest',
+      });
+      delete metadata['android:screenOrientation'];
     }
   }
   return androidManifest;

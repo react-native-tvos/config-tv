@@ -1,22 +1,10 @@
-import {
-  mergeContents,
-  removeContents,
-} from '@expo/config-plugins/build/utils/generateCode';
-import {
-  ConfigPlugin,
-  WarningAggregator,
-  withDangerousMod,
-} from 'expo/config-plugins';
+import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { promises } from 'fs';
 import glob from 'glob';
 import path from 'path';
 
 import { ConfigData } from './types';
-import {
-  isTVEnabled,
-  shouldRemoveFlipperOnAndroid,
-  showVerboseWarnings,
-} from './utils';
+import { isTVEnabled, shouldRemoveFlipperOnAndroid, verboseLog } from './utils';
 
 const pkg = require('../package.json');
 
@@ -26,7 +14,6 @@ export const withTVAndroidRemoveFlipper: ConfigPlugin<ConfigData> = (
   params = {},
 ) => {
   const isTV = isTVEnabled(params);
-  const verbose = showVerboseWarnings(params);
   const androidRemoveFlipper = shouldRemoveFlipperOnAndroid(params);
 
   return withDangerousMod(c, [
@@ -38,12 +25,11 @@ export const withTVAndroidRemoveFlipper: ConfigPlugin<ConfigData> = (
         const mainApplicationFile = mainApplicationFilePath(
           config.modRequest.platformProjectRoot,
         );
-        if (verbose) {
-          WarningAggregator.addWarningAndroid(
-            'source',
-            `${pkg.name}@${pkg.version}: removing Flipper from MainApplication file`,
-          );
-        }
+        verboseLog('removing Flipper from MainApplication file', {
+          params,
+          platform: 'android',
+          property: 'manifest',
+        });
         const mainApplicationContents = await promises.readFile(
           mainApplicationFile,
           'utf8',
@@ -62,12 +48,11 @@ export const withTVAndroidRemoveFlipper: ConfigPlugin<ConfigData> = (
         const buildGradleFile = appBuildGradleFilePath(
           config.modRequest.platformProjectRoot,
         );
-        if (verbose) {
-          WarningAggregator.addWarningAndroid(
-            'source',
-            `${pkg.name}@${pkg.version}: removing Flipper from android/app/build.gradle`,
-          );
-        }
+        verboseLog('removing Flipper from android/app/build.gradle', {
+          params,
+          platform: 'android',
+          property: 'manifest',
+        });
         const buildGradleContents = await promises.readFile(
           buildGradleFile,
           'utf-8',

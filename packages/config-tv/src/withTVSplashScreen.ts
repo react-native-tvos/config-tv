@@ -1,55 +1,50 @@
-import {
-  ConfigPlugin,
-  WarningAggregator,
-  withDangerousMod,
-} from "expo/config-plugins";
-import { promises } from "fs";
-import path from "path";
+import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
+import { promises } from 'fs';
+import path from 'path';
 
-import { ConfigData } from "./types";
-import { isTVEnabled, showVerboseWarnings } from "./utils";
+import { ConfigData } from './types';
+import { isTVEnabled, verboseLog } from './utils';
 
-const pkg = require("../package.json");
+const pkg = require('../package.json');
 
 /** Dangerously modifies or reverts changes needed for TV in SplashScreen.storyboard. */
 export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
   config,
-  params = {}
+  params = {},
 ) => {
   const isTV = isTVEnabled(params);
-  const verbose = showVerboseWarnings(params);
 
   return withDangerousMod(config, [
-    "ios",
+    'ios',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
       if (!config.modRequest.projectName) {
         throw new Error(
-          `The ${pkg.name}@${pkg.version} plugin requires a configured project name.`
+          `The ${pkg.name}@${pkg.version} plugin requires a configured project name.`,
         );
       }
       const file = path.join(
         config.modRequest.platformProjectRoot,
         config.modRequest.projectName,
-        "SplashScreen.storyboard"
+        'SplashScreen.storyboard',
       );
 
-      const contents = await promises.readFile(file, "utf8");
+      const contents = await promises.readFile(file, 'utf8');
 
       const modifiedContents = isTV
         ? addTVSplashScreenModifications(contents)
         : removeTVSplashScreenModifications(contents);
 
       if (modifiedContents !== contents) {
-        if (verbose) {
-          WarningAggregator.addWarningIOS(
-            "splashscreen",
-            `${pkg.name}@${
-              pkg.version
-            }:: modifying SplashScreen.storyboard for ${isTV ? "tvOS" : "iOS"}`
-          );
-        }
-        await promises.writeFile(file, modifiedContents, "utf-8");
+        verboseLog(
+          `modifying SplashScreen.storyboard for ${isTV ? 'tvOS' : 'iOS'}`,
+          {
+            params,
+            platform: 'ios',
+            property: 'splashscreen',
+          },
+        );
+        await promises.writeFile(file, modifiedContents, 'utf-8');
       }
       return config;
     },
@@ -57,14 +52,14 @@ export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
 };
 
 const splashScreenStringsForPhone = [
-  "com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB",
+  'com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB',
   'targetRuntime="iOS.CocoaTouch"',
   'id="retina5_5"',
   '<deployment identifier="iOS"/>',
 ];
 
 const splashScreenStringsForTV = [
-  "com.apple.InterfaceBuilder.AppleTV.Storyboard",
+  'com.apple.InterfaceBuilder.AppleTV.Storyboard',
   'targetRuntime="AppleTV"',
   'id="appleTV"',
   '<deployment identifier="tvOS"/>',
@@ -73,11 +68,11 @@ const splashScreenStringsForTV = [
 function modifySource(
   src: string,
   originalStrings: string[],
-  replacementStrings: string[]
+  replacementStrings: string[],
 ): string {
   let modifiedSource = src;
   originalStrings.forEach((s, i) => {
-    const original = new RegExp(`${s}`, "g");
+    const original = new RegExp(`${s}`, 'g');
     const replacement = replacementStrings[i];
     modifiedSource = modifiedSource.replace(original, replacement);
   });
@@ -88,7 +83,7 @@ export function addTVSplashScreenModifications(src: string): string {
   return modifySource(
     src,
     splashScreenStringsForPhone,
-    splashScreenStringsForTV
+    splashScreenStringsForTV,
   );
 }
 
@@ -96,6 +91,6 @@ export function removeTVSplashScreenModifications(src: string): string {
   return modifySource(
     src,
     splashScreenStringsForTV,
-    splashScreenStringsForPhone
+    splashScreenStringsForPhone,
   );
 }
