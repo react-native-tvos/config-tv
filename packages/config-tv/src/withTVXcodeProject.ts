@@ -1,17 +1,12 @@
 import { ExpoConfig } from '@expo/config-types';
 import {
   ConfigPlugin,
-  WarningAggregator,
   withXcodeProject,
   XcodeProject,
 } from 'expo/config-plugins';
 
 import { ConfigData } from './types';
-import {
-  isTVEnabled,
-  showVerboseWarnings,
-  tvosDeploymentTarget,
-} from './utils';
+import { isTVEnabled, tvosDeploymentTarget, verboseLog } from './utils';
 
 const pkg = require('../package.json');
 
@@ -19,14 +14,11 @@ export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
   config,
   params,
 ) => {
-  const isTV = isTVEnabled(params);
-  const verbose = showVerboseWarnings(params);
   const deploymentTarget = tvosDeploymentTarget(params);
   return withXcodeProject(config, async (config) => {
     config.modResults = await setXcodeProjectBuildSettings(config, {
       project: config.modResults,
-      isTV,
-      verbose,
+      params,
       deploymentTarget,
     });
     return config;
@@ -37,16 +29,15 @@ export function setXcodeProjectBuildSettings(
   config: Pick<ExpoConfig, 'ios'>,
   {
     project,
-    isTV,
-    verbose,
+    params,
     deploymentTarget,
   }: {
     project: XcodeProject;
-    isTV: boolean;
-    verbose: boolean;
+    params: ConfigData;
     deploymentTarget: string;
   },
 ): XcodeProject {
+  const isTV = isTVEnabled(params);
   const deviceFamilies = formatDeviceFamilies(getDeviceFamilies(config));
   const configurations = project.pbxXCBuildConfigurationSection();
   // @ts-ignore
@@ -55,14 +46,16 @@ export function setXcodeProjectBuildSettings(
     // Using `project.addToBuildSettings` modifies too many targets.
     if (typeof buildSettings?.PRODUCT_NAME !== 'undefined') {
       if (isTV && buildSettings.TARGETED_DEVICE_FAMILY !== '3') {
-        if (verbose) {
-          WarningAggregator.addWarningIOS(
-            'xcodeproject',
-            `${pkg.name}@${pkg.version}: modifying target ${
-              buildSettings?.PRODUCT_NAME
-            } for ${isTV ? 'tvOS' : 'iOS'}`,
-          );
-        }
+        verboseLog(
+          `modifying target ${buildSettings?.PRODUCT_NAME} for ${
+            isTV ? 'tvOS' : 'iOS'
+          }`,
+          {
+            params,
+            platform: 'ios',
+            property: 'xcodeproject',
+          },
+        );
         buildSettings.TARGETED_DEVICE_FAMILY = '3';
         buildSettings.TVOS_DEPLOYMENT_TARGET = deploymentTarget;
         buildSettings.SDKROOT = 'appletvos';
@@ -70,11 +63,15 @@ export function setXcodeProjectBuildSettings(
           delete buildSettings?.IOS_DEPLOYMENT_TARGET;
         }
       } else if (!isTV && buildSettings.TARGETED_DEVICE_FAMILY === '3') {
-        WarningAggregator.addWarningIOS(
-          'xcodeproject',
-          `${pkg.name}@${pkg.version}: modifying target ${
-            buildSettings?.PRODUCT_NAME
-          } for ${isTV ? 'tvOS' : 'iOS'}`,
+        verboseLog(
+          `modifying target ${buildSettings?.PRODUCT_NAME} for ${
+            isTV ? 'tvOS' : 'iOS'
+          }`,
+          {
+            params,
+            platform: 'ios',
+            property: 'xcodeproject',
+          },
         );
         buildSettings.TARGETED_DEVICE_FAMILY = deviceFamilies;
         buildSettings.IOS_DEPLOYMENT_TARGET = deploymentTarget;
