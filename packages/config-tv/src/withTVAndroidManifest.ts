@@ -4,19 +4,22 @@ import {
   ConfigPlugin,
   withAndroidManifest,
 } from 'expo/config-plugins';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, verboseLog } from './utils';
+import { androidTVBanner, isTVEnabled, verboseLog } from './utils';
 
 const pkg = require('../package.json');
 
-const { getMainActivity } = AndroidConfig.Manifest;
+const { getMainActivity, getMainApplication } = AndroidConfig.Manifest;
 
 export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
   config,
   params = {},
 ) => {
   const isTV = isTVEnabled(params);
+  const androidTVBannerPath = androidTVBanner(params);
 
   return withAndroidManifest(config, async (config) => {
     if (!isTV) {
@@ -33,6 +36,14 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
       config.modResults,
       params,
     );
+    if (androidTVBannerPath) {
+      config.modResults = setTVBanner(
+        config,
+        config.modResults,
+        params,
+        androidTVBannerPath,
+      );
+    }
     return config;
   });
 };
@@ -113,6 +124,28 @@ export async function removePortraitOrientation(
       });
       delete metadata['android:screenOrientation'];
     }
+  }
+  return androidManifest;
+}
+
+export function setTVBanner(
+  _config: Pick<ExpoConfig, 'android'>,
+  androidManifest: AndroidConfig.Manifest.AndroidManifest,
+  params: ConfigData,
+  androidTVBannerPath: string | undefined,
+): AndroidConfig.Manifest.AndroidManifest {
+  if (!androidTVBannerPath) {
+    return androidManifest;
+  }
+  const mainApplication = getMainApplication(androidManifest);
+  if (mainApplication?.$) {
+    const metadata: typeof mainApplication.$ = mainApplication?.$ ?? {};
+    verboseLog('adding TV banner to AndroidManifest.xml', {
+      params,
+      platform: 'android',
+      property: 'manifest',
+    });
+    metadata['android:banner'] = '@drawable/tv_banner';
   }
   return androidManifest;
 }
