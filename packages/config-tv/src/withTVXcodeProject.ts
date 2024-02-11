@@ -16,6 +16,10 @@ export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
 ) => {
   const deploymentTarget = tvosDeploymentTarget(params);
   return withXcodeProject(config, async (config) => {
+    const isTV = isTVEnabled(params);
+    if (!isTV) {
+      return config;
+    }
     config.modResults = await setXcodeProjectBuildSettings(config, {
       project: config.modResults,
       params,
@@ -37,7 +41,6 @@ export function setXcodeProjectBuildSettings(
     deploymentTarget: string;
   },
 ): XcodeProject {
-  const isTV = isTVEnabled(params);
   const deviceFamilies = formatDeviceFamilies(getDeviceFamilies(config));
   const configurations = project.pbxXCBuildConfigurationSection();
   // @ts-ignore
@@ -45,39 +48,17 @@ export function setXcodeProjectBuildSettings(
     // Guessing that this is the best way to emulate Xcode.
     // Using `project.addToBuildSettings` modifies too many targets.
     if (typeof buildSettings?.PRODUCT_NAME !== 'undefined') {
-      if (isTV && buildSettings.TARGETED_DEVICE_FAMILY !== '3') {
-        verboseLog(
-          `modifying target ${buildSettings?.PRODUCT_NAME} for ${
-            isTV ? 'tvOS' : 'iOS'
-          }`,
-          {
-            params,
-            platform: 'ios',
-            property: 'xcodeproject',
-          },
-        );
+      if (buildSettings.TARGETED_DEVICE_FAMILY !== '3') {
+        verboseLog(`modifying target ${buildSettings?.PRODUCT_NAME} for tvOS`, {
+          params,
+          platform: 'ios',
+          property: 'xcodeproject',
+        });
         buildSettings.TARGETED_DEVICE_FAMILY = '3';
         buildSettings.TVOS_DEPLOYMENT_TARGET = deploymentTarget;
         buildSettings.SDKROOT = 'appletvos';
         if (typeof buildSettings?.IOS_DEPLOYMENT_TARGET !== 'undefined') {
           delete buildSettings?.IOS_DEPLOYMENT_TARGET;
-        }
-      } else if (!isTV && buildSettings.TARGETED_DEVICE_FAMILY === '3') {
-        verboseLog(
-          `modifying target ${buildSettings?.PRODUCT_NAME} for ${
-            isTV ? 'tvOS' : 'iOS'
-          }`,
-          {
-            params,
-            platform: 'ios',
-            property: 'xcodeproject',
-          },
-        );
-        buildSettings.TARGETED_DEVICE_FAMILY = deviceFamilies;
-        buildSettings.IOS_DEPLOYMENT_TARGET = deploymentTarget;
-        buildSettings.SDKROOT = 'iphoneos';
-        if (typeof buildSettings?.TVOS_DEPLOYMENT_TARGET !== 'undefined') {
-          delete buildSettings?.TVOS_DEPLOYMENT_TARGET;
         }
       }
     }
