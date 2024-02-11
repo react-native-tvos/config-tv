@@ -1,31 +1,32 @@
-import { AndroidConfig } from "@expo/config-plugins";
-import { resolve } from "path";
+import { AndroidConfig } from '@expo/config-plugins';
+import { resolve } from 'path';
 
 import {
   removePortraitOrientation,
   setLeanBackLauncherIntent,
-} from "../withTVAndroidManifest";
+  setTVBanner,
+} from '../withTVAndroidManifest';
 import {
   addTVPodfileModifications,
   removeTVPodfileModifications,
-} from "../withTVPodfile";
+} from '../withTVPodfile';
 import {
   addTVSplashScreenModifications,
   removeTVSplashScreenModifications,
-} from "../withTVSplashScreen";
+} from '../withTVSplashScreen';
 
 const { readAndroidManifestAsync } = AndroidConfig.Manifest;
 
 const sampleManifestPath = resolve(
   __dirname,
-  "./fixtures",
-  "react-native-AndroidManifest.xml"
+  './fixtures',
+  'react-native-AndroidManifest.xml',
 );
 
 const sampleManifestWithNoMainIntentPath = resolve(
   __dirname,
-  "./fixtures",
-  "react-native-AndroidManifestWithNoMainIntent.xml"
+  './fixtures',
+  'react-native-AndroidManifestWithNoMainIntent.xml',
 );
 
 const originalPodfile = `
@@ -78,22 +79,22 @@ const originalSplashScreen = `
 </document>
 `;
 
-describe("withTV iOS/tvOS tests", () => {
-  test("Add TV Podfile changes", () => {
+describe('withTV iOS/tvOS tests', () => {
+  test('Add TV Podfile changes', () => {
     const modifiedPodfile = addTVPodfileModifications(originalPodfile);
     expect(modifiedPodfile).toMatchSnapshot();
   });
-  test("Revert TV podfile changes", () => {
+  test('Revert TV podfile changes', () => {
     const modifiedPodfile = addTVPodfileModifications(originalPodfile);
     const revertedPodfile = removeTVPodfileModifications(modifiedPodfile);
     expect(revertedPodfile).toEqual(originalPodfile);
   });
-  test("Add TV splash screen changes", () => {
+  test('Add TV splash screen changes', () => {
     const modifiedSplashScreen =
       addTVSplashScreenModifications(originalSplashScreen);
     expect(modifiedSplashScreen).toMatchSnapshot();
   });
-  test("Revert TV splash screen changes", () => {
+  test('Revert TV splash screen changes', () => {
     const modifiedSplashScreen =
       addTVSplashScreenModifications(originalSplashScreen);
     const revertedSplashScreen =
@@ -102,41 +103,61 @@ describe("withTV iOS/tvOS tests", () => {
   });
 });
 
-describe("with TV Android tests", () => {
-  test("Adds leanback launcher intent category for TV builds", async () => {
+describe('with TV Android tests', () => {
+  test('Adds leanback launcher intent category for TV builds', async () => {
     const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
-    const modifiedManifest = setLeanBackLauncherIntent(
-      {},
-      originalManifest,
-      false
-    );
-    expect(JSON.stringify(modifiedManifest).indexOf("LEANBACK")).not.toEqual(
-      -1
+    const modifiedManifest = setLeanBackLauncherIntent({}, originalManifest, {
+      isTV: true,
+      showVerboseWarnings: false,
+    });
+    expect(JSON.stringify(modifiedManifest).indexOf('LEANBACK')).not.toEqual(
+      -1,
     );
   });
-  test("Throws if manifest has no main intent", async () => {
+  test('Adds TV banner to main application', async () => {
+    const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
+    const modifiedManifest = setTVBanner(
+      {},
+      originalManifest,
+      {
+        isTV: true,
+        showVerboseWarnings: false,
+      },
+      'bogus',
+    );
+    expect(
+      JSON.stringify(modifiedManifest).indexOf('android:banner'),
+    ).not.toEqual(-1);
+  });
+  test('Throws if manifest has no main intent', async () => {
     const originalManifest = await readAndroidManifestAsync(
-      sampleManifestWithNoMainIntentPath
+      sampleManifestWithNoMainIntentPath,
     );
     try {
-      setLeanBackLauncherIntent({}, originalManifest, false);
+      setLeanBackLauncherIntent({}, originalManifest, {
+        isTV: true,
+        showVerboseWarnings: false,
+      });
       // Should not reach this line
       expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toContain(
-        "no main intent in main activity of Android manifest"
+        'no main intent in main activity of Android manifest',
       );
     }
   });
-  test("Removes orientation from activity metadata for TV builds", async () => {
+  test('Removes orientation from activity metadata for TV builds', async () => {
     const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
     const modifiedManifest = await removePortraitOrientation(
       {},
       originalManifest,
-      false
+      {
+        isTV: false,
+        showVerboseWarnings: false,
+      },
     );
     expect(
-      JSON.stringify(modifiedManifest).indexOf("screenOrientation")
+      JSON.stringify(modifiedManifest).indexOf('screenOrientation'),
     ).toEqual(-1);
   });
 });
