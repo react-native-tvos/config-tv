@@ -38,7 +38,8 @@ or
           "isTV": true,
           "showVerboseWarnings": false,
           "tvosDeploymentTarget": "13.4",
-          "removeFlipperOnAndroid": true
+          "removeFlipperOnAndroid": true,
+          "androidTVBanner": "assets/images/tv_banner.png"
         }
       ]
     ]
@@ -51,12 +52,13 @@ or
 _Plugin parameters_:
 
 - `isTV`: (optional boolean, default false) If true, prebuild should generate or modify Android and iOS files to build for TV (Android TV and Apple TV). If false, the plugin will have no effect. Setting the environment variable EXPO_TV to "true" or "1" will override this value and force a TV build.
-- `showVerboseWarnings`: \* Deprecated. Verbose logging is now shown as in other config plugins, by setting an environment variable:
+- `showVerboseWarnings`: Deprecated. Verbose logging is now shown as in other config plugins, by setting an environment variable:
   - EXPO_DEBUG=1 (shows debug messages from all plugins)
   - DEBUG=expo:\* (shows debug messages from all plugins)
   - DEBUG=expo:react-native-tvos:config-tv (shows debug messages from this plugin only)
 - `tvosDeploymentTarget`: (optional string, default '13.4') Used to set the tvOS deployment target version in the Xcode project.
 - `removeFlipperOnAndroid`: (optional boolean, default true) Used to remove the Flipper dependency from `MainApplication.kt` (or `MainApplication.java`) and `android/app/build.gradle`. This is necessary for React Native TV 0.73 and higher, since Flipper integration is removed from these versions. If this causes issues, set the value to false, run `npx expo prebuild --clean` again, and then remove Flipper from your Android source manually.
+- `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories.
 
 _Warning_:
 
