@@ -6,9 +6,7 @@ import {
 } from 'expo/config-plugins';
 
 import { ConfigData } from './types';
-import { isTVEnabled, tvosDeploymentTarget, verboseLog } from './utils';
-
-const pkg = require('../package.json');
+import { tvosDeploymentTarget, verboseLog } from './utils';
 
 export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
   config,
@@ -16,10 +14,6 @@ export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
 ) => {
   const deploymentTarget = tvosDeploymentTarget(params);
   return withXcodeProject(config, async (config) => {
-    const isTV = isTVEnabled(params);
-    if (!isTV) {
-      return config;
-    }
     config.modResults = await setXcodeProjectBuildSettings(config, {
       project: config.modResults,
       params,
@@ -41,7 +35,6 @@ export function setXcodeProjectBuildSettings(
     deploymentTarget: string;
   },
 ): XcodeProject {
-  const deviceFamilies = formatDeviceFamilies(getDeviceFamilies(config));
   const configurations = project.pbxXCBuildConfigurationSection();
   // @ts-ignore
   for (const { buildSettings } of Object.values(configurations || {})) {
@@ -65,40 +58,4 @@ export function setXcodeProjectBuildSettings(
   }
 
   return project;
-}
-
-/**
- * Wrapping the families in double quotes is the only way to set a value with a comma in it.
- *
- * @param deviceFamilies
- */
-export function formatDeviceFamilies(deviceFamilies: number[]): string {
-  return `"${deviceFamilies.join(',')}"`;
-}
-
-export function getSupportsTablet(config: Pick<ExpoConfig, 'ios'>): boolean {
-  return !!config.ios?.supportsTablet;
-}
-
-export function getIsTabletOnly(config: Pick<ExpoConfig, 'ios'>): boolean {
-  return !!config?.ios?.isTabletOnly;
-}
-
-export function getDeviceFamilies(config: Pick<ExpoConfig, 'ios'>): number[] {
-  const supportsTablet = getSupportsTablet(config);
-  const isTabletOnly = getIsTabletOnly(config);
-
-  if (isTabletOnly && config.ios?.supportsTablet === false) {
-    // add warning
-  }
-
-  // 1 is iPhone, 2 is iPad
-  if (isTabletOnly) {
-    return [2];
-  } else if (supportsTablet) {
-    return [1, 2];
-  } else {
-    // is iPhone only
-    return [1];
-  }
 }

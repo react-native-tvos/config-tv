@@ -4,23 +4,20 @@ import glob from 'glob';
 import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, shouldRemoveFlipperOnAndroid, verboseLog } from './utils';
-
-const pkg = require('../package.json');
+import { shouldRemoveFlipperOnAndroid, verboseLog } from './utils';
 
 /** Dangerously makes or reverts TV changes in the project Podfile. */
 export const withTVAndroidRemoveFlipper: ConfigPlugin<ConfigData> = (
   c,
   params = {},
 ) => {
-  const isTV = isTVEnabled(params);
   const androidRemoveFlipper = shouldRemoveFlipperOnAndroid(params);
 
   return withDangerousMod(c, [
     'android',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
-      if (isTV && androidRemoveFlipper) {
+      if (androidRemoveFlipper) {
         // Modify main application
         const mainApplicationFile = mainApplicationFilePath(
           config.modRequest.platformProjectRoot,

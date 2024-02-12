@@ -1,27 +1,17 @@
-import {
-  mergeContents,
-  removeContents,
-} from '@expo/config-plugins/build/utils/generateCode';
+import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
 import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { promises } from 'fs';
 import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, verboseLog } from './utils';
-
-const pkg = require('../package.json');
+import { verboseLog } from './utils';
 
 /** Dangerously makes or reverts TV changes in the project Podfile. */
 export const withTVPodfile: ConfigPlugin<ConfigData> = (c, params = {}) => {
-  const isTV = isTVEnabled(params);
-
   return withDangerousMod(c, [
     'ios',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
-      if (!isTV) {
-        return config;
-      }
       const file = path.join(config.modRequest.platformProjectRoot, 'Podfile');
 
       const contents = await promises.readFile(file, 'utf8');
