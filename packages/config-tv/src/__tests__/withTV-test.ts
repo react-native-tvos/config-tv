@@ -6,14 +6,8 @@ import {
   setLeanBackLauncherIntent,
   setTVBanner,
 } from '../withTVAndroidManifest';
-import {
-  addTVPodfileModifications,
-  removeTVPodfileModifications,
-} from '../withTVPodfile';
-import {
-  addTVSplashScreenModifications,
-  removeTVSplashScreenModifications,
-} from '../withTVSplashScreen';
+import { addTVPodfileModifications } from '../withTVPodfile';
+import { addTVSplashScreenModifications } from '../withTVSplashScreen';
 
 const { readAndroidManifestAsync } = AndroidConfig.Manifest;
 
@@ -84,22 +78,10 @@ describe('withTV iOS/tvOS tests', () => {
     const modifiedPodfile = addTVPodfileModifications(originalPodfile);
     expect(modifiedPodfile).toMatchSnapshot();
   });
-  test('Revert TV podfile changes', () => {
-    const modifiedPodfile = addTVPodfileModifications(originalPodfile);
-    const revertedPodfile = removeTVPodfileModifications(modifiedPodfile);
-    expect(revertedPodfile).toEqual(originalPodfile);
-  });
   test('Add TV splash screen changes', () => {
     const modifiedSplashScreen =
       addTVSplashScreenModifications(originalSplashScreen);
     expect(modifiedSplashScreen).toMatchSnapshot();
-  });
-  test('Revert TV splash screen changes', () => {
-    const modifiedSplashScreen =
-      addTVSplashScreenModifications(originalSplashScreen);
-    const revertedSplashScreen =
-      removeTVSplashScreenModifications(modifiedSplashScreen);
-    expect(revertedSplashScreen).toEqual(originalSplashScreen);
   });
 });
 

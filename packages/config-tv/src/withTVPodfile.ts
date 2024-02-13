@@ -1,20 +1,13 @@
-import {
-  mergeContents,
-  removeContents,
-} from '@expo/config-plugins/build/utils/generateCode';
+import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
 import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { promises } from 'fs';
 import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, verboseLog } from './utils';
-
-const pkg = require('../package.json');
+import { verboseLog } from './utils';
 
 /** Dangerously makes or reverts TV changes in the project Podfile. */
 export const withTVPodfile: ConfigPlugin<ConfigData> = (c, params = {}) => {
-  const isTV = isTVEnabled(params);
-
   return withDangerousMod(c, [
     'ios',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -23,41 +16,21 @@ export const withTVPodfile: ConfigPlugin<ConfigData> = (c, params = {}) => {
 
       const contents = await promises.readFile(file, 'utf8');
 
-      const modifiedContents = isTV
-        ? addTVPodfileModifications(contents)
-        : removeTVPodfileModifications(contents);
+      const modifiedContents = addTVPodfileModifications(contents);
 
-      if (modifiedContents !== contents) {
-        verboseLog(`modifying Podfile for ${isTV ? 'tvOS' : 'iOS'}`, {
-          params,
-          platform: 'ios',
-          property: 'podfile',
-        });
-        await promises.writeFile(file, modifiedContents, 'utf-8');
-      }
+      verboseLog('modifying Podfile for tvOS', {
+        params,
+        platform: 'ios',
+        property: 'podfile',
+      });
+      await promises.writeFile(file, modifiedContents, 'utf-8');
+
       return config;
     },
   ]);
 };
 
 const MOD_TAG = 'react-native-tvos-import';
-
-export function removeTVPodfileModifications(src: string): string {
-  if (src.indexOf('platform :tvos') === -1) {
-    return src;
-  }
-  const intermediateSrc = src.replace('platform :tvos', 'platform :ios');
-  const newSrc = removeContents({
-    src: intermediateSrc,
-    tag: MOD_TAG,
-  }).contents;
-  if (!newSrc) {
-    throw new Error(
-      `${pkg.name}@${pkg.version}: Error in removing TV modifications from Podfile. Recommend running "npx expo prebuild --clean"`,
-    );
-  }
-  return newSrc;
-}
 
 export function addTVPodfileModifications(src: string): string {
   if (src.indexOf('platform :tvos') !== -1) {

@@ -7,7 +7,12 @@ export type ConfigData = {
    */
   isTV?: boolean;
   /**
-   * If true, verbose warnings will be shown during plugin execution. (Defaults to false.)
+   * Deprecated. Verbose logging is now shown as in other config plugins, by setting an environment variable:
+   * EXPO_DEBUG=1
+   * or
+   * DEBUG=expo:* (shows debug messages from all plugins)
+   * or
+   * DEBUG=expo:react-native-tvos:config-tv (shows debug messages from this plugin only)
    */
   showVerboseWarnings?: boolean;
   /**

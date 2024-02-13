@@ -1,4 +1,3 @@
-import { WarningAggregator } from 'expo/config-plugins';
 import { boolish } from 'getenv';
 
 import { ConfigData } from './types';
@@ -19,6 +18,8 @@ const env = new Env();
 const pkg = require('../package.json');
 
 const defaultTvosDeploymentVersion = '13.4';
+
+export const packageNameAndVersion = `${pkg.name}@${pkg.version}`;
 
 export function isTVEnabled(params: ConfigData): boolean {
   return env.EXPO_TV || (params?.isTV ?? false);
@@ -42,21 +43,14 @@ export function androidTVBanner(params: ConfigData): string | undefined {
 
 export function verboseLog(
   message: string,
-  options: {
-    params: ConfigData;
-    platform: 'android' | 'ios';
-    property: string;
+  options?: {
+    params?: ConfigData;
+    platform?: 'android' | 'ios';
+    property?: string;
   },
 ) {
-  const { params, platform, property } = options;
-  const verbose = showVerboseWarnings(params);
-  if (verbose) {
-    WarningAggregator.addWarningForPlatform(
-      platform,
-      property,
-      `${pkg.name}@${pkg.version}: ${message}`,
-    );
-  } else {
-    debug(`${property}: ${message}`);
-  }
+  const tokens = [message];
+  options?.property && tokens.unshift(options?.property);
+  options?.platform && tokens.unshift(options?.platform);
+  debug(tokens.join(': '));
 }

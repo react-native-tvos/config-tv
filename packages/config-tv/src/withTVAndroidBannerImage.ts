@@ -1,15 +1,9 @@
-import {
-  ConfigPlugin,
-  WarningAggregator,
-  withDangerousMod,
-} from 'expo/config-plugins';
+import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { existsSync, promises } from 'fs';
 import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, showVerboseWarnings, androidTVBanner } from './utils';
-
-const pkg = require('../package.json');
+import { androidTVBanner, verboseLog } from './utils';
 
 const drawableDirectoryNames = [
   'drawable',
@@ -25,27 +19,24 @@ export const withTVAndroidBannerImage: ConfigPlugin<ConfigData> = (
   c,
   params = {},
 ) => {
-  const isTV = isTVEnabled(params);
-  const verbose = showVerboseWarnings(params);
   const androidTVBannerPath = androidTVBanner(params);
 
   return withDangerousMod(c, [
     'android',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
-      if (!isTV) {
-        return config;
-      }
       if (!androidTVBannerPath) {
         return config;
       }
 
-      if (verbose) {
-        WarningAggregator.addWarningAndroid(
-          'manifest',
-          `${pkg.name}@${pkg.version}: adding TV banner image ${androidTVBannerPath} to Android resources`,
-        );
-      }
+      verboseLog(
+        `adding TV banner image ${androidTVBannerPath} to Android resources`,
+        {
+          params,
+          platform: 'android',
+          property: 'manifest',
+        },
+      );
 
       for (const drawableDirectoryName of drawableDirectoryNames) {
         const drawableDirectoryPath = path.join(

@@ -3,24 +3,20 @@ import { promises } from 'fs';
 import path from 'path';
 
 import { ConfigData } from './types';
-import { isTVEnabled, verboseLog } from './utils';
+import { packageNameAndVersion, verboseLog } from './utils';
 
-const pkg = require('../package.json');
-
-/** Dangerously modifies or reverts changes needed for TV in SplashScreen.storyboard. */
+/** Dangerously makes changes needed for TV in SplashScreen.storyboard. */
 export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
   config,
   params = {},
 ) => {
-  const isTV = isTVEnabled(params);
-
   return withDangerousMod(config, [
     'ios',
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
       if (!config.modRequest.projectName) {
         throw new Error(
-          `The ${pkg.name}@${pkg.version} plugin requires a configured project name.`,
+          `The ${packageNameAndVersion} plugin requires a configured project name.`,
         );
       }
       const file = path.join(
@@ -31,21 +27,15 @@ export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
 
       const contents = await promises.readFile(file, 'utf8');
 
-      const modifiedContents = isTV
-        ? addTVSplashScreenModifications(contents)
-        : removeTVSplashScreenModifications(contents);
+      const modifiedContents = addTVSplashScreenModifications(contents);
 
-      if (modifiedContents !== contents) {
-        verboseLog(
-          `modifying SplashScreen.storyboard for ${isTV ? 'tvOS' : 'iOS'}`,
-          {
-            params,
-            platform: 'ios',
-            property: 'splashscreen',
-          },
-        );
-        await promises.writeFile(file, modifiedContents, 'utf-8');
-      }
+      verboseLog('modifying SplashScreen.storyboard for tvOS', {
+        params,
+        platform: 'ios',
+        property: 'splashscreen',
+      });
+      await promises.writeFile(file, modifiedContents, 'utf-8');
+
       return config;
     },
   ]);
@@ -84,13 +74,5 @@ export function addTVSplashScreenModifications(src: string): string {
     src,
     splashScreenStringsForPhone,
     splashScreenStringsForTV,
-  );
-}
-
-export function removeTVSplashScreenModifications(src: string): string {
-  return modifySource(
-    src,
-    splashScreenStringsForTV,
-    splashScreenStringsForPhone,
   );
 }

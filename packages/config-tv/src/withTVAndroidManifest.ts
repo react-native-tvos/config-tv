@@ -4,13 +4,9 @@ import {
   ConfigPlugin,
   withAndroidManifest,
 } from 'expo/config-plugins';
-import { promises as fs } from 'fs';
-import path from 'path';
 
 import { ConfigData } from './types';
-import { androidTVBanner, isTVEnabled, verboseLog } from './utils';
-
-const pkg = require('../package.json');
+import { androidTVBanner, packageNameAndVersion, verboseLog } from './utils';
 
 const { getMainActivity, getMainApplication } = AndroidConfig.Manifest;
 
@@ -18,20 +14,15 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
   config,
   params = {},
 ) => {
-  const isTV = isTVEnabled(params);
   const androidTVBannerPath = androidTVBanner(params);
 
-  return withAndroidManifest(config, async (config) => {
-    if (!isTV) {
-      // nothing to do
-      return config;
-    }
-    config.modResults = await setLeanBackLauncherIntent(
+  return withAndroidManifest(config, (config) => {
+    config.modResults = setLeanBackLauncherIntent(
       config,
       config.modResults,
       params,
     );
-    config.modResults = await removePortraitOrientation(
+    config.modResults = removePortraitOrientation(
       config,
       config.modResults,
       params,
@@ -84,7 +75,7 @@ export function setLeanBackLauncherIntent(
   const mainLaunchIntent = getMainLaunchIntent(androidManifest);
   if (!mainLaunchIntent) {
     throw new Error(
-      `${pkg.name}@${pkg.version}: no main intent in main activity of Android manifest`,
+      `${packageNameAndVersion}: no main intent in main activity of Android manifest`,
     );
   }
   if (!leanbackLauncherCategoryExistsInMainLaunchIntent(mainLaunchIntent)) {
@@ -108,11 +99,11 @@ export function setLeanBackLauncherIntent(
   return androidManifest;
 }
 
-export async function removePortraitOrientation(
+export function removePortraitOrientation(
   _config: Pick<ExpoConfig, 'android'>,
   androidManifest: AndroidConfig.Manifest.AndroidManifest,
   params: ConfigData,
-): Promise<AndroidConfig.Manifest.AndroidManifest> {
+): AndroidConfig.Manifest.AndroidManifest {
   const mainActivity = getMainActivity(androidManifest);
   if (mainActivity?.$) {
     const metadata: typeof mainActivity.$ = mainActivity?.$ ?? {};

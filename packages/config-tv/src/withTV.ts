@@ -7,8 +7,22 @@ import { withTVSplashScreen } from './withTVSplashScreen';
 import { withTVXcodeProject } from './withTVXcodeProject';
 import { withTVAndroidRemoveFlipper } from './withTVAndroidRemoveFlipper';
 import { withTVAndroidBannerImage } from './withTVAndroidBannerImage';
+import { isTVEnabled, packageNameAndVersion, verboseLog } from './utils';
+
+const withTVNoEffect: ConfigPlugin<ConfigData> = (config, params = {}) => {
+  verboseLog(
+    `${packageNameAndVersion}: isTV == false, plugin will have no effect`,
+    {},
+  );
+  return config;
+};
 
 const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
+  const isTV = isTVEnabled(params);
+  if (!isTV) {
+    config = withTVNoEffect(config, params);
+    return config;
+  }
   config = withTVXcodeProject(config, params);
   config = withTVPodfile(config, params);
   config = withTVSplashScreen(config, params);
