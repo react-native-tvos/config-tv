@@ -53,6 +53,12 @@ export function setXcodeProjectBuildSettings(
         if (typeof buildSettings?.IOS_DEPLOYMENT_TARGET !== 'undefined') {
           delete buildSettings?.IOS_DEPLOYMENT_TARGET;
         }
+        if (params.appleTVImages) {
+          // set the app icon source
+          if (buildSettings.ASSETCATALOG_COMPILER_APPICON_NAME === 'AppIcon') {
+            buildSettings.ASSETCATALOG_COMPILER_APPICON_NAME = 'TVAppIcon';
+          }
+        }
       }
     }
   }

@@ -58,3 +58,55 @@ exports[`withTV iOS/tvOS tests Add TV splash screen changes 1`] = `
 </document>
 "
 `;
+
+exports[`withTV iOS/tvOS tests Create Apple TV brand assets 1`] = `
+"{
+  "assets": [
+    {
+      "filename": "Top Shelf Image.imageset",
+      "role": "top-shelf-image",
+      "size": "1920x720",
+      "idiom": "tv"
+    },
+    {
+      "filename": "App Icon.imagestack",
+      "role": "primary-app-icon",
+      "size": "400x240",
+      "idiom": "tv"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "expo"
+  }
+}"
+`;
+
+exports[`withTV iOS/tvOS tests Create Apple TV brand assets 2`] = `
+"{
+  "layers": [
+    {
+      "filename": "Front.imagestacklayer"
+    },
+    {
+      "filename": "Middle.imagestacklayer"
+    },
+    {
+      "filename": "Back.imagestacklayer"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "expo"
+  }
+}"
+`;
+
+exports[`withTV iOS/tvOS tests Create Apple TV brand assets 3`] = `
+"{
+  "info": {
+    "version": 1,
+    "author": "expo"
+  }
+}"
+`;

@@ -1,5 +1,14 @@
 import { AndroidConfig } from '@expo/config-plugins';
-import { resolve } from 'path';
+import { promises as fs } from 'fs';
+import { vol } from 'memfs';
+import { join, resolve } from 'path';
+
+import {
+  originalPodfile,
+  originalSplashScreen,
+  originalAndroidManifest,
+  originalAndroidManifestNoMainIntent,
+} from './testConstants';
 
 import {
   removePortraitOrientation,
@@ -8,86 +17,151 @@ import {
 } from '../withTVAndroidManifest';
 import { addTVPodfileModifications } from '../withTVPodfile';
 import { addTVSplashScreenModifications } from '../withTVSplashScreen';
+import {
+  createBrandAssetsAsync,
+  SourceImageJson,
+  SourceBrandAssetsJson,
+} from '../utils';
 
 const { readAndroidManifestAsync } = AndroidConfig.Manifest;
 
-const sampleManifestPath = resolve(
-  __dirname,
-  './fixtures',
-  'react-native-AndroidManifest.xml',
-);
+jest.mock('fs');
 
-const sampleManifestWithNoMainIntentPath = resolve(
-  __dirname,
-  './fixtures',
-  'react-native-AndroidManifestWithNoMainIntent.xml',
-);
-
-const originalPodfile = `
-require 'json'
-podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
-
-platform :ios, '13.4'
-
-target 'Test' do
-end
-`;
-
-const originalSplashScreen = `
-<?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="EXPO-VIEWCONTROLLER-1">
-    <device id="retina5_5" orientation="portrait" appearance="light"/>
-    <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
-    </dependencies>
-    <scenes>
-        <scene sceneID="EXPO-SCENE-1">
-            <objects>
-                <viewController storyboardIdentifier="SplashScreenViewController" id="EXPO-VIEWCONTROLLER-1" sceneMemberID="viewController">
-                    <view key="view" userInteractionEnabled="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="EXPO-ContainerView" userLabel="ContainerView">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" image="SplashScreenBackground" translatesAutoresizingMaskIntoConstraints="NO" id="EXPO-SplashScreenBackground" userLabel="SplashScreenBackground">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                            </imageView>
-                            <imageView id="EXPO-SplashScreen" userLabel="SplashScreen" image="SplashScreen" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" clipsSubviews="true" userInteractionEnabled="false" translatesAutoresizingMaskIntoConstraints="false">
-                                <rect key="frame" x="0" y="0" width="414" height="736"/>
-                            </imageView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="Rmq-lb-GrQ"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="EXPO-PLACEHOLDER-1" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="140.625" y="129.4921875"/>
-        </scene>
-    </scenes>
-    <resources>
-        <image name="SplashScreenBackground" width="1" height="1"/>
-        <image name="SplashScreen" width="414" height="736"/>
-    </resources>
-</document>
-`;
+const projectRoot = '/wat';
 
 describe('withTV iOS/tvOS tests', () => {
-  test('Add TV Podfile changes', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+  test('Add TV Podfile changes', async () => {
     const modifiedPodfile = addTVPodfileModifications(originalPodfile);
     expect(modifiedPodfile).toMatchSnapshot();
   });
-  test('Add TV splash screen changes', () => {
+  test('Add TV splash screen changes', async () => {
     const modifiedSplashScreen =
       addTVSplashScreenModifications(originalSplashScreen);
     expect(modifiedSplashScreen).toMatchSnapshot();
   });
+  test('Create Apple TV brand assets', async () => {
+    vol.fromJSON(
+      {
+        'assets/images/icon.png': 'icon.png',
+        'assets/images/iconSmall.png': 'iconSmall.png',
+        'assets/images/topShelf.png': 'topShelf.png',
+        'assets/images/topShelf2x.png': 'topShelf2x.png',
+      },
+      projectRoot,
+    );
+    const iconSourceImages: SourceImageJson[] = [
+      {
+        path: join(projectRoot, 'assets/images/iconSmall.png'),
+        scale: '1x',
+      },
+      {
+        path: join(projectRoot, 'assets/images/icon.png'),
+        scale: '2x',
+      },
+    ];
+    const topShelfSourceImages: SourceImageJson[] = [
+      {
+        path: join(projectRoot, 'assets/images/topShelf.png'),
+        scale: '1x',
+      },
+      {
+        path: join(projectRoot, 'assets/images/topShelf2x.png'),
+        scale: '2x',
+      },
+    ];
+    const sourceBrandAssets: SourceBrandAssetsJson = {
+      name: 'TVAppIcon',
+      assets: [
+        {
+          role: 'top-shelf-image',
+          size: '1920x720',
+          imageSet: {
+            name: 'Top Shelf Image',
+            sourceImages: topShelfSourceImages,
+          },
+        },
+        {
+          role: 'primary-app-icon',
+          size: '400x240',
+          imageStack: {
+            name: 'App Icon',
+            sourceLayers: [
+              {
+                name: 'Front',
+                sourceImages: iconSourceImages,
+              },
+              {
+                name: 'Middle',
+                sourceImages: iconSourceImages,
+              },
+              {
+                name: 'Back',
+                sourceImages: iconSourceImages,
+              },
+            ],
+          },
+        },
+      ],
+    };
+    await createBrandAssetsAsync(projectRoot, sourceBrandAssets);
+    const topLevelContentJson = await fs.readFile(
+      resolve(projectRoot, 'TVAppIcon.brandassets', 'Contents.json'),
+      { encoding: 'utf-8' },
+    );
+    expect(topLevelContentJson).toMatchSnapshot();
+    const appIconStackContentJson = await fs.readFile(
+      resolve(
+        projectRoot,
+        'TVAppIcon.brandassets',
+        'App Icon.imagestack',
+        'Contents.json',
+      ),
+      { encoding: 'utf-8' },
+    );
+    expect(appIconStackContentJson).toMatchSnapshot();
+    const appIconFrontLayerJson = await fs.readFile(
+      resolve(
+        projectRoot,
+        'TVAppIcon.brandassets',
+        'App Icon.imagestack',
+        'Front.imagestacklayer',
+        'Contents.json',
+      ),
+      { encoding: 'utf-8' },
+    );
+    expect(appIconFrontLayerJson).toMatchSnapshot();
+    const appIconContents = await fs.readFile(
+      resolve(
+        projectRoot,
+        'TVAppIcon.brandassets',
+        'App Icon.imagestack',
+        'Front.imagestacklayer',
+        'Content.imageset',
+        'icon.png',
+      ),
+      { encoding: 'utf-8' },
+    );
+    expect(appIconContents).toEqual('icon.png');
+  });
 });
 
 describe('with TV Android tests', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
   test('Adds leanback launcher intent category for TV builds', async () => {
-    const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
+    vol.fromJSON(
+      {
+        'androidManifest.xml': originalAndroidManifest,
+      },
+      projectRoot,
+    );
+    const originalManifest = await readAndroidManifestAsync(
+      resolve(projectRoot, 'androidManifest.xml'),
+    );
     const modifiedManifest = setLeanBackLauncherIntent({}, originalManifest, {
       isTV: true,
       showVerboseWarnings: false,
@@ -97,7 +171,15 @@ describe('with TV Android tests', () => {
     );
   });
   test('Adds TV banner to main application', async () => {
-    const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
+    vol.fromJSON(
+      {
+        'androidManifest.xml': originalAndroidManifest,
+      },
+      projectRoot,
+    );
+    const originalManifest = await readAndroidManifestAsync(
+      resolve(projectRoot, 'androidManifest.xml'),
+    );
     const modifiedManifest = setTVBanner(
       {},
       originalManifest,
@@ -112,8 +194,14 @@ describe('with TV Android tests', () => {
     ).not.toEqual(-1);
   });
   test('Throws if manifest has no main intent', async () => {
+    vol.fromJSON(
+      {
+        'androidManifest.xml': originalAndroidManifestNoMainIntent,
+      },
+      projectRoot,
+    );
     const originalManifest = await readAndroidManifestAsync(
-      sampleManifestWithNoMainIntentPath,
+      resolve(projectRoot, 'androidManifest.xml'),
     );
     try {
       setLeanBackLauncherIntent({}, originalManifest, {
@@ -129,15 +217,19 @@ describe('with TV Android tests', () => {
     }
   });
   test('Removes orientation from activity metadata for TV builds', async () => {
-    const originalManifest = await readAndroidManifestAsync(sampleManifestPath);
-    const modifiedManifest = await removePortraitOrientation(
-      {},
-      originalManifest,
+    vol.fromJSON(
       {
-        isTV: false,
-        showVerboseWarnings: false,
+        'androidManifest.xml': originalAndroidManifest,
       },
+      projectRoot,
     );
+    const originalManifest = await readAndroidManifestAsync(
+      resolve(projectRoot, 'androidManifest.xml'),
+    );
+    const modifiedManifest = removePortraitOrientation({}, originalManifest, {
+      isTV: false,
+      showVerboseWarnings: false,
+    });
     expect(
       JSON.stringify(modifiedManifest).indexOf('screenOrientation'),
     ).toEqual(-1);
