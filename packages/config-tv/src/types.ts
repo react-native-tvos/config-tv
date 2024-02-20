@@ -1,3 +1,30 @@
+export type AppleTVImages = {
+  /**
+   * Path to 400x240 image
+   */
+  iconSmall: string;
+  /**
+   * Path to 1280x760 image
+   */
+  icon: string;
+  /**
+   * Path to 1920x720 image
+   */
+  topShelf: string;
+  /**
+   * Path to 3840x1440 image
+   */
+  topShelf2x: string;
+  /**
+   * Path to 2320x720 image
+   */
+  topShelfWide: string;
+  /**
+   * Path to 4640x1440 image
+   */
+  topShelfWide2x: string;
+};
+
 export type ConfigData = {
   /**
    * If true, prebuild should generate Android and iOS files for TV (Android TV and Apple TV).
@@ -30,4 +57,13 @@ export type ConfigData = {
    * Android resource drawable directories.
    */
   androidTVBanner?: string;
+  /**
+   * If set, this is an object with the paths to images needed to construct the Apple TV icon and
+   * top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode
+   * project Image catalog, and the project updated to use the brand assets as the source for the app
+   * icons. If this property is set, all six image paths must be defined and the files must exist,
+   * or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid
+   * errors during Xcode compilation and on submission to the App Store or TestFlight.
+   */
+  appleTVImages?: AppleTVImages;
 };
