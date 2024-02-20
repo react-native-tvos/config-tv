@@ -1,6 +1,6 @@
 {
   "name": "@react-native-tvos/config-tv",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Config plugin to reconfigure native directories for Apple TV and Android TV development if needed",
   "main": "build/withTV.js",
   "types": "build/withTV.d.ts",
