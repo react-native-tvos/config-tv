@@ -27,6 +27,11 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
       config.modResults,
       params,
     );
+    config.modResults = addTouchscreenHardwareFeatureToManifest(
+      config,
+      config.modResults,
+      params,
+    );
     if (androidTVBannerPath) {
       config.modResults = setTVBanner(
         config,
@@ -137,6 +142,57 @@ export function setTVBanner(
       property: 'manifest',
     });
     metadata['android:banner'] = '@drawable/tv_banner';
+  }
+  return androidManifest;
+}
+
+export function addTouchscreenHardwareFeatureToManifest(
+  _config: Pick<ExpoConfig, 'android'>,
+  androidManifest: AndroidConfig.Manifest.AndroidManifest,
+  params: ConfigData,
+): AndroidConfig.Manifest.AndroidManifest {
+  // Add `<uses-feature android:name="android.hardware.touchscreen" android:required="false"/>` to the AndroidManifest.xml
+  if (!Array.isArray(androidManifest.manifest['uses-feature'])) {
+    androidManifest.manifest['uses-feature'] = [];
+  }
+  if (
+    !androidManifest.manifest['uses-feature'].find(
+      (item) => item.$['android:name'] === 'android.hardware.touchscreen',
+    ) &&
+    !androidManifest.manifest['uses-feature'].find(
+      (item) => item.$['android:name'] === 'android.hardware.faketouch',
+    ) &&
+    !androidManifest.manifest['uses-feature'].find(
+      (item) => item.$['android:name'] === 'android.software.leanback',
+    )
+  ) {
+    verboseLog(
+      'adding TV touchscreen hardware feature tag to AndroidManifest.xml',
+      {
+        params,
+        platform: 'android',
+        property: 'manifest',
+      },
+    );
+    androidManifest.manifest['uses-feature']?.push({
+      $: {
+        'android:name': 'android.hardware.touchscreen',
+        'android:required': 'false',
+      },
+    });
+    androidManifest.manifest['uses-feature']?.push({
+      $: {
+        'android:name': 'android.hardware.faketouch',
+        'android:required': 'false',
+      },
+    });
+    // add android.software.leanback to false
+    androidManifest.manifest['uses-feature']?.push({
+      $: {
+        'android:name': 'android.software.leanback',
+        'android:required': 'false',
+      },
+    });
   }
   return androidManifest;
 }
