@@ -53,22 +53,31 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
         IMAGES_PATH,
       );
 
-      const iconSourceImages: SourceImageJson[] = [
+      const iconSmallSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.iconSmall,
           scale: '1x',
         },
         {
-          path: params.appleTVImages.icon,
+          path: params.appleTVImages.iconSmall2x,
           scale: '2x',
         },
       ];
 
+      const iconLargeSourceImages: SourceImageJson[] = [
+        {
+          path: params.appleTVImages.icon,
+          scale: '1x',
+        },
+      ];
+
+      /*
       const appStoreIconSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.icon,
         },
       ];
+       */
 
       const topShelfSourceImages: SourceImageJson[] = [
         {
@@ -111,6 +120,7 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
               sourceImages: topShelfWideSourceImages,
             },
           },
+          /*
           {
             role: 'primary-app-icon',
             size: '1280x768',
@@ -132,23 +142,45 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
               ],
             },
           },
+           */
           {
             role: 'primary-app-icon',
             size: '400x240',
             imageStack: {
-              name: 'App Icon',
+              name: 'App Icon - Small',
               sourceLayers: [
                 {
                   name: 'Front',
-                  sourceImages: iconSourceImages,
+                  sourceImages: iconSmallSourceImages,
                 },
                 {
                   name: 'Middle',
-                  sourceImages: iconSourceImages,
+                  sourceImages: iconSmallSourceImages,
                 },
                 {
                   name: 'Back',
-                  sourceImages: iconSourceImages,
+                  sourceImages: iconSmallSourceImages,
+                },
+              ],
+            },
+          },
+          {
+            role: 'primary-app-icon',
+            size: '1280x768',
+            imageStack: {
+              name: 'App Icon - Large',
+              sourceLayers: [
+                {
+                  name: 'Front',
+                  sourceImages: iconLargeSourceImages,
+                },
+                {
+                  name: 'Middle',
+                  sourceImages: iconLargeSourceImages,
+                },
+                {
+                  name: 'Back',
+                  sourceImages: iconLargeSourceImages,
                 },
               ],
             },

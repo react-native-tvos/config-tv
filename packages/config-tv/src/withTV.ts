@@ -3,6 +3,7 @@ import { ConfigPlugin, createRunOncePlugin } from 'expo/config-plugins';
 import { ConfigData } from './types';
 import { withTVAndroidManifest } from './withTVAndroidManifest';
 import { withTVAppleIconImages } from './withTVAppleIconImages';
+import { withTVInfoPlist } from './withTVInfoPlist';
 import { withTVPodfile } from './withTVPodfile';
 import { withTVSplashScreen } from './withTVSplashScreen';
 import { withTVXcodeProject } from './withTVXcodeProject';
@@ -27,6 +28,7 @@ const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
   config = withTVAppleIconImages(config, params); // This should be done before Apple Xcode project config
   config = withTVXcodeProject(config, params);
   config = withTVPodfile(config, params);
+  config = withTVInfoPlist(config, params);
   config = withTVSplashScreen(config, params);
   config = withTVAndroidBannerImage(config, params); // This should be done before Android manifest config
   config = withTVAndroidManifest(config, params);

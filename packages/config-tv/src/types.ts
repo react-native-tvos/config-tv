@@ -4,6 +4,10 @@ export type AppleTVImages = {
    */
   iconSmall: string;
   /**
+   * Path to 800x480 image
+   */
+  iconSmall2x: string;
+  /**
    * Path to 1280x760 image
    */
   icon: string;

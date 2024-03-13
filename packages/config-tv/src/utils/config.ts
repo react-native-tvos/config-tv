@@ -36,6 +36,7 @@ export function androidTVBanner(params: ConfigData): string | undefined {
 export const appleTVImageTypes = [
   'icon',
   'iconSmall',
+  'iconSmall2x',
   'topShelf',
   'topShelf2x',
   'topShelfWide',
@@ -48,6 +49,8 @@ export function appleTVImagePathForType(params: ConfigData, imageType: string) {
       return params?.appleTVImages?.icon;
     case 'iconSmall':
       return params?.appleTVImages?.iconSmall;
+    case 'iconSmall2x':
+      return params?.appleTVImages?.iconSmall2x;
     case 'topShelf':
       return params?.appleTVImages?.topShelf;
     case 'topShelf2x':

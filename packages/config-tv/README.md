@@ -42,6 +42,7 @@ or
           "appleTVImages": {
             "icon": "./assets/images/myimage-tvos-1280x768.png",
             "iconSmall": "./assets/images/myimage-tvos-400x240.png",
+            "iconSmall2x": "./assets/images/myimage-tvos-800x480.png",
             "topShelf": "./assets/images/myimage-tvos-1920x720.png",
             "topShelf2x": "./assets/images/myimage-tvos-3840x1440.png",
             "topShelfWide": "./assets/images/myimage-tvos-2320x720.png",
@@ -66,9 +67,10 @@ _Plugin parameters_:
 - `tvosDeploymentTarget`: (optional string, default '13.4') Used to set the tvOS deployment target version in the Xcode project.
 - `removeFlipperOnAndroid`: (optional boolean, default true) Used to remove the Flipper dependency from `MainApplication.kt` (or `MainApplication.java`) and `android/app/build.gradle`. This is necessary for React Native TV 0.73 and higher, since Flipper integration is removed from these versions. If this causes issues, set the value to false, run `npx expo prebuild --clean` again, and then remove Flipper from your Android source manually.
 - `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories.
-- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. If this property is set, all six image paths must be defined and the files must exist, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
+- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. If this property is set, all image paths must be defined and the files must exist, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
   - `icon`: (string) Path to a 1280x760 image
   - `iconSmall`: (string) Path to a 400x240 image
+  - `iconSmall2x`: (string) Path to a 800x480 image
   - `topShelf`: (string) Path to a 1920x720 image
   - `topShelf2x`: (string) Path to a 3840x1440 image
   - `topShelfWide`: (string) Path to a 2320x720 image
@@ -81,7 +83,7 @@ When this plugin is used to generate files in the iOS directory that build an Ap
 ```json
 {
   "dependencies": {
-    "react-native": "npm:react-native-tvos@^0.73.2-0"
+    "react-native": "npm:react-native-tvos@^0.73.6-0"
   }
 }
 ```
