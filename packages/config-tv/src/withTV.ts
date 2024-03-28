@@ -13,13 +13,16 @@ import { isTVEnabled, packageNameAndVersion, verboseLog } from './utils';
 
 const withTVNoEffect: ConfigPlugin<ConfigData> = (config, params = {}) => {
   verboseLog(
-    `${packageNameAndVersion}: isTV == false, plugin will have no effect`,
+    `${packageNameAndVersion}: isTV == false, TV-specific modifications will not be made.`,
     {},
   );
   return config;
 };
 
 const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
+  // This plugin should always run
+  config = withTVAndroidRemoveFlipper(config, params);
+  // Return if TV is not enabled
   const isTV = isTVEnabled(params);
   if (!isTV) {
     config = withTVNoEffect(config, params);
@@ -32,7 +35,6 @@ const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
   config = withTVSplashScreen(config, params);
   config = withTVAndroidBannerImage(config, params); // This should be done before Android manifest config
   config = withTVAndroidManifest(config, params);
-  config = withTVAndroidRemoveFlipper(config, params);
 
   return config;
 };
