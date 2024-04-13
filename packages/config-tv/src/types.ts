@@ -57,6 +57,13 @@ export type ConfigData = {
    */
   removeFlipperOnAndroid?: boolean;
   /**
+   * If set, the Android manifest will be configured for Android TV only
+   * (no Android mobile support).
+   * Specifically, the "uses-feature" tag for "android.software.leanback"
+   * will be set to "required=true".
+   */
+  androidTVRequired?: boolean;
+  /**
    * If set, this should be a path to an existing PNG file appropriate for an Android TV banner image.
    * See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner
    * The Android manifest will be modified to reference this image, and the image will be copied into

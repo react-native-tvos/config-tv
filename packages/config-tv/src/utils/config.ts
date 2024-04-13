@@ -29,6 +29,10 @@ export function shouldRemoveFlipperOnAndroid(params: ConfigData): boolean {
   return params?.removeFlipperOnAndroid ?? true;
 }
 
+export function isAndroidTVRequired(params: ConfigData): boolean {
+  return params?.androidTVRequired ?? false;
+}
+
 export function androidTVBanner(params: ConfigData): string | undefined {
   return params?.androidTVBanner;
 }
