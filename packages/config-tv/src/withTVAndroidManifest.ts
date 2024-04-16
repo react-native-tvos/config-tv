@@ -6,7 +6,12 @@ import {
 } from 'expo/config-plugins';
 
 import { ConfigData } from './types';
-import { androidTVBanner, packageNameAndVersion, verboseLog } from './utils';
+import {
+  androidTVBanner,
+  isAndroidTVRequired,
+  packageNameAndVersion,
+  verboseLog,
+} from './utils';
 
 const { getMainActivity, getMainApplication } = AndroidConfig.Manifest;
 
@@ -190,7 +195,7 @@ export function addTouchscreenHardwareFeatureToManifest(
     androidManifest.manifest['uses-feature']?.push({
       $: {
         'android:name': 'android.software.leanback',
-        'android:required': 'false',
+        'android:required': isAndroidTVRequired(params) ? 'true' : 'false',
       },
     });
   }
