@@ -9,6 +9,7 @@ import { withTVSplashScreen } from './withTVSplashScreen';
 import { withTVXcodeProject } from './withTVXcodeProject';
 import { withTVAndroidRemoveFlipper } from './withTVAndroidRemoveFlipper';
 import { withTVAndroidBannerImage } from './withTVAndroidBannerImage';
+import { withTVAndroidIconImage } from './withTVAndroidIconImage';
 import { isTVEnabled, packageNameAndVersion, verboseLog } from './utils';
 
 const withTVNoEffect: ConfigPlugin<ConfigData> = (config, params = {}) => {
@@ -34,6 +35,7 @@ const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
   config = withTVInfoPlist(config, params);
   config = withTVSplashScreen(config, params);
   config = withTVAndroidBannerImage(config, params); // This should be done before Android manifest config
+  config = withTVAndroidIconImage(config, params);
   config = withTVAndroidManifest(config, params);
 
   return config;

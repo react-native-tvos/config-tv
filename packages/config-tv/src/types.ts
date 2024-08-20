@@ -71,6 +71,13 @@ export type ConfigData = {
    */
   androidTVBanner?: string;
   /**
+   * If set, this should be a path to an existing PNG file appropriate for an Ancroid TV icon image.
+   * See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#launcher-icon
+   * The Android manifest will be modified to reference this image and the image will be copied into
+   * Android resource drawable directories.
+   */
+  androidTVIcon?: string;
+  /**
    * If set, this is an object with the paths to images needed to construct the Apple TV icon and
    * top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode
    * project Image catalog, and the project updated to use the brand assets as the source for the app

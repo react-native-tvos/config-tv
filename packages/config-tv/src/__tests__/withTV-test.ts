@@ -14,6 +14,7 @@ import {
   removePortraitOrientation,
   setLeanBackLauncherIntent,
   setTVBanner,
+  setTVIcon
 } from '../withTVAndroidManifest';
 import { addTVPodfileModifications } from '../withTVPodfile';
 import { addTVSplashScreenModifications } from '../withTVSplashScreen';
@@ -191,6 +192,29 @@ describe('with TV Android tests', () => {
     );
     expect(
       JSON.stringify(modifiedManifest).indexOf('android:banner'),
+    ).not.toEqual(-1);
+  });
+  test('Adds TV icon to main application', async () => {
+    vol.fromJSON(
+      {
+        'androidManifest.xml': originalAndroidManifest,
+      },
+      projectRoot,
+    );
+    const originalManifest = await readAndroidManifestAsync(
+      resolve(projectRoot, 'androidManifest.xml'),
+    );
+    const modifiedManifest = setTVIcon(
+      {},
+      originalManifest,
+      {
+        isTV: true,
+        showVerboseWarnings: false,
+      },
+      'bogus',
+    );
+    expect(
+      JSON.stringify(modifiedManifest).indexOf('android:icon'),
     ).not.toEqual(-1);
   });
   test('Throws if manifest has no main intent', async () => {
