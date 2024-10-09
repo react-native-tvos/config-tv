@@ -73,6 +73,7 @@ export type ConfigData = {
   /**
    * If set, this should be a path to an existing PNG file appropriate for an Ancroid TV icon image.
    * See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#launcher-icon
+   * The icon image will not be resized.
    * The Android manifest will be modified to reference this image and the image will be copied into
    * Android resource drawable directories.
    */
