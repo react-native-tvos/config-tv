@@ -37,6 +37,10 @@ export function androidTVBanner(params: ConfigData): string | undefined {
   return params?.androidTVBanner;
 }
 
+export function androidTVIcon(params: ConfigData): string | undefined {
+  return params?.androidTVIcon
+}
+
 export const appleTVImageTypes = [
   'icon',
   'iconSmall',

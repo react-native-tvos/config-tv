@@ -11,6 +11,7 @@ import {
   isAndroidTVRequired,
   packageNameAndVersion,
   verboseLog,
+  androidTVIcon
 } from './utils';
 
 const { getMainActivity, getMainApplication } = AndroidConfig.Manifest;
@@ -20,6 +21,7 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
   params = {},
 ) => {
   const androidTVBannerPath = androidTVBanner(params);
+  const androidTVIconPath = androidTVIcon(params);
 
   return withAndroidManifest(config, (config) => {
     config.modResults = setLeanBackLauncherIntent(
@@ -43,6 +45,14 @@ export const withTVAndroidManifest: ConfigPlugin<ConfigData> = (
         config.modResults,
         params,
         androidTVBannerPath,
+      );
+    }
+    if (androidTVIconPath) {
+      config.modResults = setTVIcon(
+        config,
+        config.modResults,
+        params,
+        androidTVIconPath,
       );
     }
     return config;
@@ -147,6 +157,28 @@ export function setTVBanner(
       property: 'manifest',
     });
     metadata['android:banner'] = '@drawable/tv_banner';
+  }
+  return androidManifest;
+}
+
+export function setTVIcon(
+  _config: Pick<ExpoConfig, 'android'>,
+  androidManifest: AndroidConfig.Manifest.AndroidManifest,
+  params: ConfigData,
+  androidTVIconPath: string | undefined,
+): AndroidConfig.Manifest.AndroidManifest {
+  if (!androidTVIconPath) {
+    return androidManifest;
+  }
+  const mainApplication = getMainApplication(androidManifest);
+  if (mainApplication?.$) {
+    const metadata: typeof mainApplication.$ = mainApplication?.$ ?? {};
+    verboseLog('adding TV icon to AndroidManifest.xml', {
+      params,
+      platform: 'android',
+      property: 'manifest',
+    });
+    metadata['android:icon'] = '@drawable/tv_icon';
   }
   return androidManifest;
 }
