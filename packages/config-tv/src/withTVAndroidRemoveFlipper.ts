@@ -1,6 +1,6 @@
 import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
 import { promises } from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import path from 'path';
 
 import { ConfigData } from './types';
@@ -71,7 +71,7 @@ export const withTVAndroidRemoveFlipper: ConfigPlugin<ConfigData> = (
 };
 
 const mainApplicationFilePath = (androidRoot: string) => {
-  const paths = glob.sync(`${androidRoot}/**/MainApplication.*`);
+  const paths = globSync(`${androidRoot}/**/MainApplication.*`);
   if (paths.length > 0) {
     return paths[0];
   } else {
