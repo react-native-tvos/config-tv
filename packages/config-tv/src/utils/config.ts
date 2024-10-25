@@ -26,7 +26,7 @@ export function tvosDeploymentTarget(params: ConfigData): string {
 }
 
 export function shouldRemoveFlipperOnAndroid(params: ConfigData): boolean {
-  return params?.removeFlipperOnAndroid ?? true;
+  return params?.removeFlipperOnAndroid ?? false;
 }
 
 export function isAndroidTVRequired(params: ConfigData): boolean {
