@@ -1,19 +1,19 @@
-import { boolish } from 'getenv';
+import { boolish } from "getenv";
 
-import { ConfigData } from '../types';
+import { ConfigData } from "../types";
 
 class Env {
   /** Enable prebuild for TV */
   get EXPO_TV() {
-    return boolish('EXPO_TV', false);
+    return boolish("EXPO_TV", false);
   }
 }
 
 const env = new Env();
 
-const pkg = require('../../package.json');
+const pkg = require("../../package.json");
 
-const defaultTvosDeploymentVersion = '13.4';
+const defaultTvosDeploymentVersion = "13.4";
 
 export const packageNameAndVersion = `${pkg.name}@${pkg.version}`;
 
@@ -38,34 +38,34 @@ export function androidTVBanner(params: ConfigData): string | undefined {
 }
 
 export function androidTVIcon(params: ConfigData): string | undefined {
-  return params?.androidTVIcon
+  return params?.androidTVIcon;
 }
 
 export const appleTVImageTypes = [
-  'icon',
-  'iconSmall',
-  'iconSmall2x',
-  'topShelf',
-  'topShelf2x',
-  'topShelfWide',
-  'topShelfWide2x',
+  "icon",
+  "iconSmall",
+  "iconSmall2x",
+  "topShelf",
+  "topShelf2x",
+  "topShelfWide",
+  "topShelfWide2x",
 ];
 
 export function appleTVImagePathForType(params: ConfigData, imageType: string) {
   switch (imageType) {
-    case 'icon':
+    case "icon":
       return params?.appleTVImages?.icon;
-    case 'iconSmall':
+    case "iconSmall":
       return params?.appleTVImages?.iconSmall;
-    case 'iconSmall2x':
+    case "iconSmall2x":
       return params?.appleTVImages?.iconSmall2x;
-    case 'topShelf':
+    case "topShelf":
       return params?.appleTVImages?.topShelf;
-    case 'topShelf2x':
+    case "topShelf2x":
       return params?.appleTVImages?.topShelf2x;
-    case 'topShelfWide':
+    case "topShelfWide":
       return params?.appleTVImages?.topShelfWide;
-    case 'topShelfWide2x':
+    case "topShelfWide2x":
       return params?.appleTVImages?.topShelfWide2x;
     default:
       return undefined;

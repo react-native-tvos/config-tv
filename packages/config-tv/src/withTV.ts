@@ -1,16 +1,16 @@
-import { ConfigPlugin, createRunOncePlugin } from 'expo/config-plugins';
+import { ConfigPlugin, createRunOncePlugin } from "expo/config-plugins";
 
-import { ConfigData } from './types';
-import { withTVAndroidManifest } from './withTVAndroidManifest';
-import { withTVAppleIconImages } from './withTVAppleIconImages';
-import { withTVInfoPlist } from './withTVInfoPlist';
-import { withTVPodfile } from './withTVPodfile';
-import { withTVSplashScreen } from './withTVSplashScreen';
-import { withTVXcodeProject } from './withTVXcodeProject';
-import { withTVAndroidRemoveFlipper } from './withTVAndroidRemoveFlipper';
-import { withTVAndroidBannerImage } from './withTVAndroidBannerImage';
-import { withTVAndroidIconImage } from './withTVAndroidIconImage';
-import { isTVEnabled, packageNameAndVersion, verboseLog } from './utils';
+import { ConfigData } from "./types";
+import { isTVEnabled, packageNameAndVersion, verboseLog } from "./utils";
+import { withTVAndroidBannerImage } from "./withTVAndroidBannerImage";
+import { withTVAndroidIconImage } from "./withTVAndroidIconImage";
+import { withTVAndroidManifest } from "./withTVAndroidManifest";
+import { withTVAndroidRemoveFlipper } from "./withTVAndroidRemoveFlipper";
+import { withTVAppleIconImages } from "./withTVAppleIconImages";
+import { withTVInfoPlist } from "./withTVInfoPlist";
+import { withTVPodfile } from "./withTVPodfile";
+import { withTVSplashScreen } from "./withTVSplashScreen";
+import { withTVXcodeProject } from "./withTVXcodeProject";
 
 const withTVNoEffect: ConfigPlugin<ConfigData> = (config, params = {}) => {
   verboseLog(
@@ -41,6 +41,6 @@ const withTVPlugin: ConfigPlugin<ConfigData> = (config, params = {}) => {
   return config;
 };
 
-const pkg = require('../package.json');
+const pkg = require("../package.json");
 
 export default createRunOncePlugin(withTVPlugin, pkg.name, pkg.version);

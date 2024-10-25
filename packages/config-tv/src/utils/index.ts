@@ -1,3 +1,3 @@
-export * from './appleBrandAssets';
-export * from './config';
-export * from './log';
+export * from "./appleBrandAssets";
+export * from "./config";
+export * from "./log";

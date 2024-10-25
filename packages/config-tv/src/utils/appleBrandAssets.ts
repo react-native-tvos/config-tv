@@ -1,19 +1,19 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from "fs";
+import path from "path";
 
-export type ContentsJsonImageIdiom = 'tv';
+export type ContentsJsonImageIdiom = "tv";
 
 export type ContentsJsonImageAppearance = {
-  appearance: 'luminosity';
-  value: 'dark';
+  appearance: "luminosity";
+  value: "dark";
 };
 
-export type ContentsJsonImageScale = '1x' | '2x' | '3x';
+export type ContentsJsonImageScale = "1x" | "2x" | "3x";
 
 export type ContentsJsonImageRole =
-  | 'primary-app-icon'
-  | 'top-shelf-image'
-  | 'top-shelf-image-wide';
+  | "primary-app-icon"
+  | "top-shelf-image"
+  | "top-shelf-image-wide";
 
 export interface ContentsJsonImage {
   appearances?: ContentsJsonImageAppearance[];
@@ -93,7 +93,7 @@ export async function writeContentsJsonAsync(
   await fs.mkdir(directory, { recursive: true });
 
   await fs.writeFile(
-    path.join(directory, 'Contents.json'),
+    path.join(directory, "Contents.json"),
     JSON.stringify(
       {
         assets: options.assets,
@@ -102,7 +102,7 @@ export async function writeContentsJsonAsync(
         info: {
           version: 1,
           // common practice is for the tool that generated the icons to be the "author"
-          author: 'expo',
+          author: "expo",
         },
       },
       null,
@@ -122,7 +122,7 @@ export async function createImageSetAsync(
   await writeContentsJsonAsync(imageSetPath, {
     images: imageSet.sourceImages.map((image: any) => ({
       filename: path.basename(image.path),
-      idiom: 'tv',
+      idiom: "tv",
       scale: image.scale,
     })),
   });
@@ -147,7 +147,7 @@ export async function createImageStackLayerAsync(
   );
   await writeContentsJsonAsync(imageStackLayerPath, {});
   await createImageSetAsync(imageStackLayerPath, {
-    name: 'Content',
+    name: "Content",
     sourceImages: layer.sourceImages,
   });
 }
@@ -191,14 +191,14 @@ export async function createBrandAssetsAsync(
           filename: `${brandAsset.imageStack.name}.imagestack`,
           role: brandAsset.role,
           size: brandAsset.size,
-          idiom: 'tv',
+          idiom: "tv",
         };
       } else if (brandAsset.imageSet) {
         return {
           filename: `${brandAsset.imageSet.name}.imageset`,
           role: brandAsset.role,
           size: brandAsset.size,
-          idiom: 'tv',
+          idiom: "tv",
         };
       } else {
         return {}; // Should never happen, but need this to keep Typescript happy
