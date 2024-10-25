@@ -1,8 +1,8 @@
-import { ConfigPlugin, IOSConfig, withDangerousMod } from 'expo/config-plugins';
-import { existsSync } from 'fs';
-import path from 'path';
+import { ConfigPlugin, IOSConfig, withDangerousMod } from "expo/config-plugins";
+import { existsSync } from "fs";
+import path from "path";
 
-import { ConfigData } from './types';
+import { ConfigData } from "./types";
 import {
   appleTVImageTypes,
   appleTVImagePathForType,
@@ -10,7 +10,7 @@ import {
   createBrandAssetsAsync,
   SourceImageJson,
   type SourceBrandAssetsJson,
-} from './utils';
+} from "./utils";
 
 const { getProjectName } = IOSConfig.XcodeUtils;
 
@@ -23,7 +23,7 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
   params = {},
 ) => {
   return withDangerousMod(c, [
-    'ios',
+    "ios",
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
       if (!params.appleTVImages) {
@@ -32,8 +32,8 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
 
       verboseLog(`adding Apple TV brand assets to Apple TV native code`, {
         params,
-        platform: 'ios',
-        property: 'xcodeproject',
+        platform: "ios",
+        property: "xcodeproject",
       });
 
       appleTVImageTypes.forEach((imageType) => {
@@ -56,18 +56,18 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
       const iconSmallSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.iconSmall,
-          scale: '1x',
+          scale: "1x",
         },
         {
           path: params.appleTVImages.iconSmall2x,
-          scale: '2x',
+          scale: "2x",
         },
       ];
 
       const iconLargeSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.icon,
-          scale: '1x',
+          scale: "1x",
         },
       ];
 
@@ -82,41 +82,41 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
       const topShelfSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.topShelf,
-          scale: '1x',
+          scale: "1x",
         },
         {
           path: params.appleTVImages.topShelf2x,
-          scale: '2x',
+          scale: "2x",
         },
       ];
 
       const topShelfWideSourceImages: SourceImageJson[] = [
         {
           path: params.appleTVImages.topShelfWide,
-          scale: '1x',
+          scale: "1x",
         },
         {
           path: params.appleTVImages.topShelfWide2x,
-          scale: '2x',
+          scale: "2x",
         },
       ];
 
       const sourceBrandAssets: SourceBrandAssetsJson = {
-        name: 'TVAppIcon',
+        name: "TVAppIcon",
         assets: [
           {
-            role: 'top-shelf-image',
-            size: '1920x720',
+            role: "top-shelf-image",
+            size: "1920x720",
             imageSet: {
-              name: 'Top Shelf Image',
+              name: "Top Shelf Image",
               sourceImages: topShelfSourceImages,
             },
           },
           {
-            role: 'top-shelf-image-wide',
-            size: '2320x720',
+            role: "top-shelf-image-wide",
+            size: "2320x720",
             imageSet: {
-              name: 'Top Shelf Image Wide',
+              name: "Top Shelf Image Wide",
               sourceImages: topShelfWideSourceImages,
             },
           },
@@ -144,42 +144,42 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
           },
            */
           {
-            role: 'primary-app-icon',
-            size: '400x240',
+            role: "primary-app-icon",
+            size: "400x240",
             imageStack: {
-              name: 'App Icon - Small',
+              name: "App Icon - Small",
               sourceLayers: [
                 {
-                  name: 'Front',
+                  name: "Front",
                   sourceImages: iconSmallSourceImages,
                 },
                 {
-                  name: 'Middle',
+                  name: "Middle",
                   sourceImages: iconSmallSourceImages,
                 },
                 {
-                  name: 'Back',
+                  name: "Back",
                   sourceImages: iconSmallSourceImages,
                 },
               ],
             },
           },
           {
-            role: 'primary-app-icon',
-            size: '1280x768',
+            role: "primary-app-icon",
+            size: "1280x768",
             imageStack: {
-              name: 'App Icon - Large',
+              name: "App Icon - Large",
               sourceLayers: [
                 {
-                  name: 'Front',
+                  name: "Front",
                   sourceImages: iconLargeSourceImages,
                 },
                 {
-                  name: 'Middle',
+                  name: "Middle",
                   sourceImages: iconLargeSourceImages,
                 },
                 {
-                  name: 'Back',
+                  name: "Back",
                   sourceImages: iconLargeSourceImages,
                 },
               ],
@@ -197,7 +197,7 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
 
 function getIosNamedProjectPath(projectRoot: string): string {
   const projectName = getProjectName(projectRoot);
-  return path.join(projectRoot, 'ios', projectName);
+  return path.join(projectRoot, "ios", projectName);
 }
 
-const IMAGES_PATH = 'Images.xcassets';
+const IMAGES_PATH = "Images.xcassets";

@@ -1,2 +1,2 @@
-import { fs } from 'memfs';
+import { fs } from "memfs";
 module.exports = fs;

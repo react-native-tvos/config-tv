@@ -1,39 +1,39 @@
-import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
-import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
-import { promises } from 'fs';
-import path from 'path';
+import { mergeContents } from "@expo/config-plugins/build/utils/generateCode";
+import { ConfigPlugin, withDangerousMod } from "expo/config-plugins";
+import { promises } from "fs";
+import path from "path";
 
-import { ConfigData } from './types';
-import { verboseLog } from './utils';
+import { ConfigData } from "./types";
+import { verboseLog } from "./utils";
 
 /** Dangerously makes or reverts TV changes in the project Podfile. */
 export const withTVPodfile: ConfigPlugin<ConfigData> = (c, params = {}) => {
   return withDangerousMod(c, [
-    'ios',
+    "ios",
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
-      const file = path.join(config.modRequest.platformProjectRoot, 'Podfile');
+      const file = path.join(config.modRequest.platformProjectRoot, "Podfile");
 
-      const contents = await promises.readFile(file, 'utf8');
+      const contents = await promises.readFile(file, "utf8");
 
       const modifiedContents = addTVPodfileModifications(contents);
 
-      verboseLog('modifying Podfile for tvOS', {
+      verboseLog("modifying Podfile for tvOS", {
         params,
-        platform: 'ios',
-        property: 'podfile',
+        platform: "ios",
+        property: "podfile",
       });
-      await promises.writeFile(file, modifiedContents, 'utf-8');
+      await promises.writeFile(file, modifiedContents, "utf-8");
 
       return config;
     },
   ]);
 };
 
-const MOD_TAG = 'react-native-tvos-import';
+const MOD_TAG = "react-native-tvos-import";
 
 export function addTVPodfileModifications(src: string): string {
-  if (src.indexOf('platform :tvos') !== -1) {
+  if (src.indexOf("platform :tvos") !== -1) {
     return src;
   }
   const newSrc = mergeContents({
@@ -43,8 +43,8 @@ export function addTVPodfileModifications(src: string): string {
       "source 'https://github.com/react-native-tvos/react-native-tvos-podspecs.git'\nsource 'https://cdn.cocoapods.org/'\n",
     anchor: /^/,
     offset: 0,
-    comment: '#',
+    comment: "#",
   }).contents;
 
-  return newSrc.replace('platform :ios', 'platform :tvos');
+  return newSrc.replace("platform :ios", "platform :tvos");
 }

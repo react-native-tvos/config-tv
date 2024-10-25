@@ -1,17 +1,17 @@
-import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
-import { existsSync, promises } from 'fs';
-import path from 'path';
+import { ConfigPlugin, withDangerousMod } from "expo/config-plugins";
+import { existsSync, promises } from "fs";
+import path from "path";
 
-import { ConfigData } from './types';
-import { androidTVBanner, verboseLog } from './utils';
+import { ConfigData } from "./types";
+import { androidTVBanner, verboseLog } from "./utils";
 
 const drawableDirectoryNames = [
-  'drawable',
-  'drawable-hdpi',
-  'drawable-mdpi',
-  'drawable-xhdpi',
-  'drawable-xxhdpi',
-  'drawable-xxxhdpi',
+  "drawable",
+  "drawable-hdpi",
+  "drawable-mdpi",
+  "drawable-xhdpi",
+  "drawable-xxhdpi",
+  "drawable-xxxhdpi",
 ];
 
 /** Copies TV banner image to the Android resources drawable folders. If image does not exist, throw an exception. */
@@ -22,7 +22,7 @@ export const withTVAndroidBannerImage: ConfigPlugin<ConfigData> = (
   const androidTVBannerPath = androidTVBanner(params);
 
   return withDangerousMod(c, [
-    'android',
+    "android",
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
       if (!androidTVBannerPath) {
@@ -33,18 +33,18 @@ export const withTVAndroidBannerImage: ConfigPlugin<ConfigData> = (
         `adding TV banner image ${androidTVBannerPath} to Android resources`,
         {
           params,
-          platform: 'android',
-          property: 'manifest',
+          platform: "android",
+          property: "manifest",
         },
       );
 
       for (const drawableDirectoryName of drawableDirectoryNames) {
         const drawableDirectoryPath = path.join(
           config.modRequest.platformProjectRoot,
-          'app',
-          'src',
-          'main',
-          'res',
+          "app",
+          "src",
+          "main",
+          "res",
           drawableDirectoryName,
         );
         if (!existsSync(drawableDirectoryPath)) {
@@ -52,7 +52,7 @@ export const withTVAndroidBannerImage: ConfigPlugin<ConfigData> = (
         }
         await promises.copyFile(
           androidTVBannerPath,
-          path.join(drawableDirectoryPath, 'tv_banner.png'),
+          path.join(drawableDirectoryPath, "tv_banner.png"),
         );
       }
       return config;

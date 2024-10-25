@@ -51,9 +51,9 @@ export type ConfigData = {
    */
   tvosDeploymentTarget?: string;
   /**
-   * If set, Android code that references Flipper will be removed. (Defaults to true.)
-   * This change will be made regardless of the setting of the `EXPO_TV` environment variable or
-   * the value of the `isTV` plugin parameter, as it is needed for both Android mobile and Android TV.
+   * If set, Android code that references Flipper will be removed. (Defaults to false.)
+   * If enabled, this change will be made regardless of the setting of the `EXPO_TV` environment variable or
+   * the value of the `isTV` plugin parameter.
    */
   removeFlipperOnAndroid?: boolean;
   /**

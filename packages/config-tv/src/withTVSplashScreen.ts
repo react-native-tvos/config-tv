@@ -1,9 +1,9 @@
-import { ConfigPlugin, withDangerousMod } from 'expo/config-plugins';
-import { promises } from 'fs';
-import path from 'path';
+import { ConfigPlugin, withDangerousMod } from "expo/config-plugins";
+import { promises } from "fs";
+import path from "path";
 
-import { ConfigData } from './types';
-import { packageNameAndVersion, verboseLog } from './utils';
+import { ConfigData } from "./types";
+import { packageNameAndVersion, verboseLog } from "./utils";
 
 /** Dangerously makes changes needed for TV in SplashScreen.storyboard. */
 export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
@@ -11,7 +11,7 @@ export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
   params = {},
 ) => {
   return withDangerousMod(config, [
-    'ios',
+    "ios",
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async (config) => {
       if (!config.modRequest.projectName) {
@@ -22,19 +22,19 @@ export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
       const file = path.join(
         config.modRequest.platformProjectRoot,
         config.modRequest.projectName,
-        'SplashScreen.storyboard',
+        "SplashScreen.storyboard",
       );
 
-      const contents = await promises.readFile(file, 'utf8');
+      const contents = await promises.readFile(file, "utf8");
 
       const modifiedContents = addTVSplashScreenModifications(contents);
 
-      verboseLog('modifying SplashScreen.storyboard for tvOS', {
+      verboseLog("modifying SplashScreen.storyboard for tvOS", {
         params,
-        platform: 'ios',
-        property: 'splashscreen',
+        platform: "ios",
+        property: "splashscreen",
       });
-      await promises.writeFile(file, modifiedContents, 'utf-8');
+      await promises.writeFile(file, modifiedContents, "utf-8");
 
       return config;
     },
@@ -42,14 +42,14 @@ export const withTVSplashScreen: ConfigPlugin<ConfigData> = (
 };
 
 const splashScreenStringsForPhone = [
-  'com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB',
+  "com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB",
   'targetRuntime="iOS.CocoaTouch"',
   'id="retina5_5"',
   '<deployment identifier="iOS"/>',
 ];
 
 const splashScreenStringsForTV = [
-  'com.apple.InterfaceBuilder.AppleTV.Storyboard',
+  "com.apple.InterfaceBuilder.AppleTV.Storyboard",
   'targetRuntime="AppleTV"',
   'id="appleTV"',
   '<deployment identifier="tvOS"/>',
@@ -62,7 +62,7 @@ function modifySource(
 ): string {
   let modifiedSource = src;
   originalStrings.forEach((s, i) => {
-    const original = new RegExp(`${s}`, 'g');
+    const original = new RegExp(`${s}`, "g");
     const replacement = replacementStrings[i];
     modifiedSource = modifiedSource.replace(original, replacement);
   });

@@ -1,4 +1,5 @@
 {
   "jest.jestCommandLine": "npx expo-module test",
-  "jest.rootPath": "packages/config-tv"
+  "jest.rootPath": "packages/config-tv",
+  "prettier.singleQuote": false
 }
