@@ -1,6 +1,7 @@
 import { ExpoConfig } from "@expo/config-types";
 import {
   ConfigPlugin,
+  ExportedConfigWithProps,
   withXcodeProject,
   XcodeProject,
 } from "expo/config-plugins";
@@ -24,7 +25,7 @@ export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
 };
 
 export function setXcodeProjectBuildSettings(
-  config: Pick<ExpoConfig, "ios">,
+  _: ExportedConfigWithProps<XcodeProject>,
   {
     project,
     params,

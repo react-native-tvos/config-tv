@@ -34,7 +34,7 @@
     "react-native-tvos"
   ],
   "peerDependencies": {
-    "expo": "^51"
+    "expo": "^52"
   },
   "devDependencies": {
     "@types/getenv": "^1.0.1",
