@@ -36,7 +36,7 @@ or
         {
           "isTV": true,
           "showVerboseWarnings": false,
-          "tvosDeploymentTarget": "13.4",
+          "tvosDeploymentTarget": "15.1",
           "removeFlipperOnAndroid": true,
           "androidTVBanner": "assets/images/tv_banner.png",
           "androidTVIcon": "assets/images/tv_icon.png",
@@ -65,7 +65,7 @@ _Plugin parameters_:
   - `EXPO_DEBUG=1` (shows debug messages from all plugins)
   - `DEBUG=expo:*` (shows debug messages from all plugins)
   - `DEBUG=expo:react-native-tvos:config-tv` (shows debug messages from this plugin only)
-- `tvosDeploymentTarget`: (optional string, default '13.4') Used to set the tvOS deployment target version in the Xcode project.
+- `tvosDeploymentTarget`: (optional string, default '15.1') Used to set the tvOS deployment target version in the Xcode project.
 - `removeFlipperOnAndroid`: (optional boolean, default false) Used to remove the Flipper dependency from `MainApplication.kt` (or `MainApplication.java`) and `android/app/build.gradle`. This may be necessary for React Native TV 0.73 and higher, since Flipper integration is removed from these versions. If this causes issues, set the value to false, run `npx expo prebuild --clean` again, and then remove Flipper from your Android source manually. If enabled, this change will be made regardless of the setting of the `EXPO_TV` environment variable or the value of the `isTV` plugin parameter.
 - `androidTVRequired`: (optional boolean, default false) If set, the Android manifest will be configured for Android TV only (no Android mobile support). Specifically, the "uses-feature" tag for "android.software.leanback" will be set to "required=true".
 - `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories.
