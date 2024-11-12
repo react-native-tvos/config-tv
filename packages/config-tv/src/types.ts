@@ -47,7 +47,7 @@ export type ConfigData = {
    */
   showVerboseWarnings?: boolean;
   /**
-   * If set, this will be used as the tvOS deployment target version instead of the default (13.4).
+   * If set, this will be used as the tvOS deployment target version instead of the default (15.1).
    */
   tvosDeploymentTarget?: string;
   /**

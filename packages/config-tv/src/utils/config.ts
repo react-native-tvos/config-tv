@@ -13,7 +13,7 @@ const env = new Env();
 
 const pkg = require("../../package.json");
 
-const defaultTvosDeploymentVersion = "13.4";
+const defaultTvosDeploymentVersion = "15.1";
 
 export const packageNameAndVersion = `${pkg.name}@${pkg.version}`;
 

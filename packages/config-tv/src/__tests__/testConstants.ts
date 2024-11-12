@@ -2,7 +2,7 @@ export const originalPodfile = `
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
-platform :ios, '13.4'
+platform :ios, '15.1'
 
 target 'Test' do
 end
