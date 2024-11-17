@@ -57,10 +57,13 @@ export const withTVAndroidIconImage: ConfigPlugin<ConfigData> = (
             path.join(drawableDirectoryPath, "tv_icon.png"),
           );
         } else {
-          await promises.copyFile(
-            androidTVIconPath,
-            path.join(drawableDirectoryPath, "ic_launcher.png"),
-          );
+          // SDK 52 adds a webp ic_launcher, which could lead to duplicate resource build error
+          if (!existsSync(path.join(drawableDirectoryPath, "ic_launcher.webp"))) {
+            await promises.copyFile(
+              androidTVIconPath,
+              path.join(drawableDirectoryPath, "ic_launcher.png"),
+            );
+          }
           await promises.copyFile(
             androidTVIconPath,
             path.join(drawableDirectoryPath, "ic_launcher_round.png"),
