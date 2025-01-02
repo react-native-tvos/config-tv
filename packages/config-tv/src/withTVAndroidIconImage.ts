@@ -64,10 +64,12 @@ export const withTVAndroidIconImage: ConfigPlugin<ConfigData> = (
               path.join(drawableDirectoryPath, "ic_launcher.png"),
             );
           }
-          await promises.copyFile(
-            androidTVIconPath,
-            path.join(drawableDirectoryPath, "ic_launcher_round.png"),
-          );
+          if (!existsSync(path.join(drawableDirectoryPath, "ic_launcher_round.webp"))) {
+            await promises.copyFile(
+                androidTVIconPath,
+                path.join(drawableDirectoryPath, "ic_launcher_round.png"),
+            );
+          }
         }
       }
       return config;
