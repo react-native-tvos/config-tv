@@ -1,12 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`withTV iOS/tvOS tests Add TV Podfile changes 1`] = `
-"# @generated begin react-native-tvos-import - expo prebuild (DO NOT MODIFY) sync-45ad7228312d07c1751c6969560a210e8ec46f80
-source 'https://github.com/react-native-tvos/react-native-tvos-podspecs.git'
-source 'https://cdn.cocoapods.org/'
-
-# @generated end react-native-tvos-import
-
+"
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
