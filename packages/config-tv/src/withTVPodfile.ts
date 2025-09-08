@@ -30,12 +30,14 @@ export const withTVPodfile: ConfigPlugin<ConfigData> = (c, params = {}) => {
   ]);
 };
 
-const MOD_TAG = "react-native-tvos-import";
+// const MOD_TAG = "react-native-tvos-import";
 
 export function addTVPodfileModifications(src: string): string {
   if (src.indexOf("platform :tvos") !== -1) {
     return src;
   }
+  // We no longer need the custom podspecs source
+  /*
   const newSrc = mergeContents({
     tag: MOD_TAG,
     src,
@@ -45,6 +47,6 @@ export function addTVPodfileModifications(src: string): string {
     offset: 0,
     comment: "#",
   }).contents;
-
-  return newSrc.replace("platform :ios", "platform :tvos");
+   */
+  return src.replace("platform :ios", "platform :tvos");
 }
