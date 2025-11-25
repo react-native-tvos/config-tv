@@ -71,7 +71,7 @@ _Plugin parameters_:
 - `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories.
 - `androidTVIcon`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV icon image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#launcher-icon . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable and mipmap directories.
 - `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. If this property is set, all image paths must be defined and the files must exist, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
-  - `icon`: (string) Path to a 1280x760 image
+  - `icon`: (string) Path to a 1280x768 image
   - `iconSmall`: (string) Path to a 400x240 image
   - `iconSmall2x`: (string) Path to a 800x480 image
   - `topShelf`: (string) Path to a 1920x720 image
