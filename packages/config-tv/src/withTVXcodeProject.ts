@@ -57,9 +57,8 @@ export function setXcodeProjectBuildSettings(
       }
       if (params.appleTVImages) {
         // set the app icon source
-        if (buildSettings.ASSETCATALOG_COMPILER_APPICON_NAME === "AppIcon") {
-          buildSettings.ASSETCATALOG_COMPILER_APPICON_NAME = "TVAppIcon";
-        }
+        buildSettings.ASSETCATALOG_COMPILER_APPICON_NAME = "TVAppIcon";
+        buildSettings.ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = "YES";
       }
     }
   }
