@@ -1,4 +1,3 @@
-import { ExpoConfig } from "@expo/config-types";
 import {
   ConfigPlugin,
   ExportedConfigWithProps,
