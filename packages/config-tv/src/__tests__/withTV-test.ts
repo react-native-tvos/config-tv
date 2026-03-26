@@ -1,4 +1,4 @@
-import { AndroidConfig } from "@expo/config-plugins";
+import { AndroidConfig } from "expo/config-plugins";
 import { promises as fs } from "fs";
 import { vol } from "memfs";
 import { join, resolve } from "path";
