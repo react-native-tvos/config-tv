@@ -1,4 +1,3 @@
-import { mergeContents } from "@expo/config-plugins/build/utils/generateCode";
 import { ConfigPlugin, withDangerousMod } from "expo/config-plugins";
 import { promises } from "fs";
 import path from "path";
@@ -38,7 +37,7 @@ export function addTVPodfileModifications(src: string): string {
   }
   // We no longer need the custom podspecs source
   /*
-  const newSrc = mergeContents({
+  const newSrc = CodeGenerator.mergeContents({
     tag: MOD_TAG,
     src,
     newSrc:
