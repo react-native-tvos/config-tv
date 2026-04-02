@@ -1,3 +1,4 @@
+import { ExpoConfig } from "expo/config";
 import { boolish } from "getenv";
 
 import { ConfigData } from "../types";
@@ -21,8 +22,39 @@ export function isTVEnabled(params: ConfigData): boolean {
   return env.EXPO_TV || (params?.isTV ?? false);
 }
 
-export function tvosDeploymentTarget(params: ConfigData): string {
-  return params?.tvosDeploymentTarget ?? defaultTvosDeploymentVersion;
+/**
+ * Returns the iOS deployment target from the expo-build-properties plugin, if present.
+ */
+function iosDeploymentTargetFromBuildProperties(
+  config: ExpoConfig,
+): string | undefined {
+  const plugins = config?.plugins;
+  if (!Array.isArray(plugins)) {
+    return undefined;
+  }
+  for (const plugin of plugins) {
+    if (Array.isArray(plugin) && plugin[0] === "expo-build-properties") {
+      return plugin[1]?.ios?.deploymentTarget;
+    }
+  }
+  return undefined;
+}
+
+export function tvosDeploymentTarget(
+  params: ConfigData,
+  config?: ExpoConfig,
+  expoDefaultIosDeploymentTarget?: string,
+): string {
+  if (params?.tvosDeploymentTarget) {
+    return params.tvosDeploymentTarget;
+  }
+  if (config) {
+    const buildPropsTarget = iosDeploymentTargetFromBuildProperties(config);
+    if (buildPropsTarget) {
+      return buildPropsTarget;
+    }
+  }
+  return expoDefaultIosDeploymentTarget ?? defaultTvosDeploymentVersion;
 }
 
 export function shouldRemoveFlipperOnAndroid(params: ConfigData): boolean {

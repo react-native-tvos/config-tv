@@ -1,3 +1,4 @@
+import { ExpoConfig } from "expo/config";
 import { AndroidConfig } from "expo/config-plugins";
 import { promises as fs } from "fs";
 import { vol } from "memfs";
@@ -13,6 +14,7 @@ import {
   createBrandAssetsAsync,
   SourceImageJson,
   SourceBrandAssetsJson,
+  tvosDeploymentTarget,
 } from "../utils";
 import {
   removePortraitOrientation,
@@ -256,5 +258,76 @@ describe("with TV Android tests", () => {
     expect(
       JSON.stringify(modifiedManifest).indexOf("screenOrientation"),
     ).toEqual(-1);
+  });
+});
+
+describe("tvosDeploymentTarget", () => {
+  const configWithBuildProperties = (
+    deploymentTarget: string,
+  ): ExpoConfig => ({
+    name: "test",
+    slug: "test",
+    plugins: [
+      ["expo-build-properties", { ios: { deploymentTarget } }],
+    ],
+  });
+
+  const configWithoutBuildProperties: ExpoConfig = {
+    name: "test",
+    slug: "test",
+    plugins: [["some-other-plugin", {}]],
+  };
+
+  const configWithNoPlugins: ExpoConfig = {
+    name: "test",
+    slug: "test",
+  };
+
+  test("uses plugin param tvosDeploymentTarget when provided", () => {
+    const result = tvosDeploymentTarget(
+      { isTV: true, tvosDeploymentTarget: "16.0" },
+      configWithBuildProperties("17.0"),
+      "18.0",
+    );
+    expect(result).toBe("16.0");
+  });
+
+  test("falls back to expo-build-properties ios.deploymentTarget", () => {
+    const result = tvosDeploymentTarget(
+      { isTV: true },
+      configWithBuildProperties("17.0"),
+      "18.0",
+    );
+    expect(result).toBe("17.0");
+  });
+
+  test("falls back to Expo default iOS deployment target", () => {
+    const result = tvosDeploymentTarget(
+      { isTV: true },
+      configWithoutBuildProperties,
+      "18.0",
+    );
+    expect(result).toBe("18.0");
+  });
+
+  test("falls back to hardcoded default when no config or Expo default", () => {
+    const result = tvosDeploymentTarget({ isTV: true });
+    expect(result).toBe("15.1");
+  });
+
+  test("falls back to hardcoded default when config has no plugins", () => {
+    const result = tvosDeploymentTarget(
+      { isTV: true },
+      configWithNoPlugins,
+    );
+    expect(result).toBe("15.1");
+  });
+
+  test("falls back to hardcoded default when config has no expo-build-properties", () => {
+    const result = tvosDeploymentTarget(
+      { isTV: true },
+      configWithoutBuildProperties,
+    );
+    expect(result).toBe("15.1");
   });
 });
