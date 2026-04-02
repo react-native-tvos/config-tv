@@ -8,12 +8,35 @@ import {
 import { ConfigData } from "./types";
 import { tvosDeploymentTarget, verboseLog } from "./utils";
 
+/**
+ * Reads the existing IPHONEOS_DEPLOYMENT_TARGET from the Xcode project build settings.
+ * This represents Expo's default iOS deployment target as set during prebuild.
+ */
+function getExpoDefaultIosDeploymentTarget(
+  project: XcodeProject,
+): string | undefined {
+  const configurations = project.pbxXCBuildConfigurationSection();
+  // @ts-ignore
+  for (const { buildSettings } of Object.values(configurations || {})) {
+    if (buildSettings?.IPHONEOS_DEPLOYMENT_TARGET) {
+      return buildSettings.IPHONEOS_DEPLOYMENT_TARGET;
+    }
+  }
+  return undefined;
+}
+
 export const withTVXcodeProject: ConfigPlugin<ConfigData> = (
   config,
   params,
 ) => {
-  const deploymentTarget = tvosDeploymentTarget(params);
   return withXcodeProject(config, async (config) => {
+    const expoDefaultIosDeploymentTarget =
+      getExpoDefaultIosDeploymentTarget(config.modResults);
+    const deploymentTarget = tvosDeploymentTarget(
+      params,
+      config,
+      expoDefaultIosDeploymentTarget,
+    );
     config.modResults = await setXcodeProjectBuildSettings(config, {
       project: config.modResults,
       params,
