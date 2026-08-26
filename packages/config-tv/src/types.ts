@@ -19,7 +19,7 @@ export type AppleTVIconLayers = {
 
 export type AppleTVImages = {
   /**
-   * Path to 400x240 image, used for every layer. Either this or `iconSmallLayers` is required.
+   * Path to 400x240 image, used for every layer
    */
   iconSmall?: string;
   /**
@@ -27,7 +27,7 @@ export type AppleTVImages = {
    */
   iconSmallLayers?: AppleTVIconLayers;
   /**
-   * Path to 800x480 image, used for every layer. Either this or `iconSmall2xLayers` is required.
+   * Path to 800x480 image, used for every layer
    */
   iconSmall2x?: string;
   /**
@@ -35,7 +35,7 @@ export type AppleTVImages = {
    */
   iconSmall2xLayers?: AppleTVIconLayers;
   /**
-   * Path to 1280x768 image, used for every layer. Either this or `iconLayers` is required.
+   * Path to 1280x768 image, used for every layer
    */
   icon?: string;
   /**
@@ -45,19 +45,19 @@ export type AppleTVImages = {
   /**
    * Path to 1920x720 image
    */
-  topShelf: string;
+  topShelf?: string;
   /**
    * Path to 3840x1440 image
    */
-  topShelf2x: string;
+  topShelf2x?: string;
   /**
    * Path to 2320x720 image
    */
-  topShelfWide: string;
+  topShelfWide?: string;
   /**
    * Path to 4640x1440 image
    */
-  topShelfWide2x: string;
+  topShelfWide2x?: string;
 };
 
 export type ConfigData = {
@@ -113,10 +113,12 @@ export type ConfigData = {
    * If set, this is an object with the paths to images needed to construct the Apple TV icon and
    * top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode
    * project Image catalog, and the project updated to use the brand assets as the source for the app
-   * icons. If this property is set, every brand asset must have an image and the files must
-   * exist, or an error will be thrown; each app icon takes either a single image or one image
-   * per layer. The images need to be the exact sizes shown here, in order to avoid errors
-   * during Xcode compilation and on submission to the App Store or TestFlight.
+   * icons. Images may be left out: a brand asset with no image given here keeps the one
+   * already in the project's brand assets catalog. The two app icons are required, so an
+   * error will be thrown if one of them is in neither place. Every path given must point to
+   * an existing file, or an error will be thrown. The images need to be the exact sizes shown
+   * here, in order to avoid errors during Xcode compilation and on submission to the App
+   * Store or TestFlight.
    */
   appleTVImages?: AppleTVImages;
 };

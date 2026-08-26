@@ -6,6 +6,9 @@ import { AppleTVIconLayers, AppleTVImages, ConfigData } from "./types";
 import {
   verboseLog,
   createBrandAssetsAsync,
+  existingBrandAssetsAsync,
+  ContentsJsonAsset,
+  SourceBrandAssetJson,
   SourceImageJson,
   SourceImageLayerJson,
   type SourceBrandAssetsJson,
@@ -55,6 +58,51 @@ function sourceImages(
   );
 }
 
+type CandidateBrandAsset = SourceBrandAssetJson & { required: boolean };
+
+function assetName(asset: SourceBrandAssetJson): string {
+  return asset.imageSet?.name ?? asset.imageStack?.name ?? asset.role;
+}
+
+function hasSourceImages(asset: SourceBrandAssetJson): boolean {
+  return (
+    (asset.imageSet?.sourceImages.length ?? 0) > 0 ||
+    (asset.imageStack?.sourceLayers.length ?? 0) > 0
+  );
+}
+
+/**
+ * Returns the brand asset to write, as a single element array so that an optional asset
+ * with no image anywhere can be left out entirely.
+ */
+function resolveBrandAsset(
+  asset: SourceBrandAssetJson,
+  required: boolean,
+  existingAssets: ContentsJsonAsset[],
+): SourceBrandAssetJson[] {
+  if (hasSourceImages(asset)) {
+    return [asset];
+  }
+  const existingFilename = existingAssets.find(
+    (existing) => existing.role === asset.role && existing.size === asset.size,
+  )?.filename;
+  if (existingFilename) {
+    verboseLog(`keeping the existing ${assetName(asset)} brand asset`, {
+      platform: "ios",
+      property: "xcodeproject",
+    });
+    return [{ role: asset.role, size: asset.size, existingFilename }];
+  }
+  if (required) {
+    throw new Error(`No image or existing brand asset for ${assetName(asset)}`);
+  }
+  verboseLog(
+    `no image or existing brand asset for ${assetName(asset)}, it will not be set`,
+    { platform: "ios", property: "xcodeproject" },
+  );
+  return [];
+}
+
 function sourceLayersForIcon(iconScales: IconScale[]): SourceImageLayerJson[] {
   const layerImagesByScale = iconScales.map((iconScale) => ({
     scale: iconScale.scale,
@@ -72,42 +120,26 @@ function sourceLayersForIcon(iconScales: IconScale[]): SourceImageLayerJson[] {
 
 /**
  * Builds the Apple TV brand assets from the `appleTVImages` plugin property.
- * If any image is not defined, or does not exist, an exception is thrown.
+ * A brand asset with no image given keeps the one already in the catalog. The app icons
+ * are required, so an exception is thrown when one is in neither place. If an image is
+ * given but does not exist, an exception is thrown.
  */
 export function appleTVSourceBrandAssets(
   images: AppleTVImages,
+  existingAssets: ContentsJsonAsset[] = [],
 ): SourceBrandAssetsJson {
-  const iconSmallScales: IconScale[] = [
+  const iconSmallSourceLayers = sourceLayersForIcon([
     { scale: "1x", image: images.iconSmall, layers: images.iconSmallLayers },
     {
       scale: "2x",
       image: images.iconSmall2x,
       layers: images.iconSmall2xLayers,
     },
-  ];
+  ]);
 
-  const iconLargeScales: IconScale[] = [
+  const iconLargeSourceLayers = sourceLayersForIcon([
     { scale: "1x", image: images.icon, layers: images.iconLayers },
-  ];
-
-  // An app icon scale can be given as a single image or as layers, but not neither
-  const everyImageDefined =
-    [...iconSmallScales, ...iconLargeScales].every(
-      (iconScale) => iconScale.image ?? iconScale.layers,
-    ) &&
-    [
-      images.topShelf,
-      images.topShelf2x,
-      images.topShelfWide,
-      images.topShelfWide2x,
-    ].every((image) => image !== undefined);
-  if (!everyImageDefined) {
-    throw new Error(`One or more image paths not defined`);
-  }
-
-  const iconSmallSourceLayers = sourceLayersForIcon(iconSmallScales);
-
-  const iconLargeSourceLayers = sourceLayersForIcon(iconLargeScales);
+  ]);
 
   /*
   const appStoreIconSourceImages: SourceImageJson[] = [
@@ -127,65 +159,73 @@ export function appleTVSourceBrandAssets(
     { scale: "2x", image: images.topShelfWide2x },
   ]);
 
+  const candidateAssets: CandidateBrandAsset[] = [
+    {
+      required: false,
+      role: "top-shelf-image",
+      size: "1920x720",
+      imageSet: {
+        name: "Top Shelf Image",
+        sourceImages: topShelfSourceImages,
+      },
+    },
+    {
+      required: false,
+      role: "top-shelf-image-wide",
+      size: "2320x720",
+      imageSet: {
+        name: "Top Shelf Image Wide",
+        sourceImages: topShelfWideSourceImages,
+      },
+    },
+    /*
+    {
+      role: 'primary-app-icon',
+      size: '1280x768',
+      imageStack: {
+        name: 'App Icon - App Store',
+        sourceLayers: [
+          {
+            name: 'Front',
+            sourceImages: appStoreIconSourceImages,
+          },
+          {
+            name: 'Middle',
+            sourceImages: appStoreIconSourceImages,
+          },
+          {
+            name: 'Back',
+            sourceImages: appStoreIconSourceImages,
+          },
+        ],
+      },
+    },
+     */
+    {
+      required: true,
+      role: "primary-app-icon",
+      size: "400x240",
+      imageStack: {
+        name: "App Icon - Small",
+        sourceLayers: iconSmallSourceLayers,
+      },
+    },
+    {
+      required: true,
+      role: "primary-app-icon",
+      size: "1280x768",
+      imageStack: {
+        name: "App Icon - Large",
+        sourceLayers: iconLargeSourceLayers,
+      },
+    },
+  ];
+
   const sourceBrandAssets: SourceBrandAssetsJson = {
-    name: "TVAppIcon",
-    assets: [
-      {
-        role: "top-shelf-image",
-        size: "1920x720",
-        imageSet: {
-          name: "Top Shelf Image",
-          sourceImages: topShelfSourceImages,
-        },
-      },
-      {
-        role: "top-shelf-image-wide",
-        size: "2320x720",
-        imageSet: {
-          name: "Top Shelf Image Wide",
-          sourceImages: topShelfWideSourceImages,
-        },
-      },
-      /*
-      {
-        role: 'primary-app-icon',
-        size: '1280x768',
-        imageStack: {
-          name: 'App Icon - App Store',
-          sourceLayers: [
-            {
-              name: 'Front',
-              sourceImages: appStoreIconSourceImages,
-            },
-            {
-              name: 'Middle',
-              sourceImages: appStoreIconSourceImages,
-            },
-            {
-              name: 'Back',
-              sourceImages: appStoreIconSourceImages,
-            },
-          ],
-        },
-      },
-       */
-      {
-        role: "primary-app-icon",
-        size: "400x240",
-        imageStack: {
-          name: "App Icon - Small",
-          sourceLayers: iconSmallSourceLayers,
-        },
-      },
-      {
-        role: "primary-app-icon",
-        size: "1280x768",
-        imageStack: {
-          name: "App Icon - Large",
-          sourceLayers: iconLargeSourceLayers,
-        },
-      },
-    ],
+    name: BRAND_ASSETS_NAME,
+    assets: candidateAssets.flatMap(({ required, ...asset }) =>
+      resolveBrandAsset(asset, required, existingAssets),
+    ),
   };
 
   for (const asset of sourceBrandAssets.assets) {
@@ -236,7 +276,10 @@ export const withTVAppleIconImages: ConfigPlugin<ConfigData> = (
 
       await createBrandAssetsAsync(
         iosImagesPath,
-        appleTVSourceBrandAssets(params.appleTVImages),
+        appleTVSourceBrandAssets(
+          params.appleTVImages,
+          await existingBrandAssetsAsync(iosImagesPath, BRAND_ASSETS_NAME),
+        ),
       );
 
       return config;
@@ -250,3 +293,5 @@ function getIosNamedProjectPath(projectRoot: string): string {
 }
 
 const IMAGES_PATH = "Images.xcassets";
+
+const BRAND_ASSETS_NAME = "TVAppIcon";

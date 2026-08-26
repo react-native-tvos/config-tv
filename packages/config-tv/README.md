@@ -70,7 +70,7 @@ _Plugin parameters_:
 - `androidTVRequired`: (optional boolean, default false) If set, the Android manifest will be configured for Android TV only (no Android mobile support). Specifically, the "uses-feature" tag for "android.software.leanback" will be set to "required=true".
 - `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories. **NOTE:** This does not apply to Fire TV and is instead set by the app store submission. See https://developer.amazon.com/docs/app-submission/appstore-details.html#firetvassets
 - `androidTVIcon`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV icon image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#launcher-icon . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable and mipmap directories.
-- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. If this property is set, all image paths must be defined and the files must exist, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
+- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. Images may be left out; see [partial brand assets](#partial-brand-assets). Every path given must point to an existing file, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
   - `icon`: (string) Path to a 1280x768 image
   - `iconLayers`: (optional object) Paths to 1280x768 images, one per layer. Takes precedence over `icon`. See [layered app icons](#layered-app-icons)
   - `iconSmall`: (string) Path to a 400x240 image
@@ -81,6 +81,19 @@ _Plugin parameters_:
   - `topShelf2x`: (string) Path to a 3840x1440 image
   - `topShelfWide`: (string) Path to a 2320x720 image
   - `topShelfWide2x`: (string) Path to a 4640x1440 image
+
+### Partial brand assets
+
+`appleTVImages` does not have to describe the whole catalog. For a brand asset it was given
+no image for, the plugin keeps the asset already in the project's brand assets, so an
+existing tvOS app can override just its app icon and keep the top shelf art it already
+ships.
+
+The two app icons are required: if one is neither given in `appleTVImages` nor already in
+the catalog, an error is thrown. A top shelf image in neither place is left unset.
+
+An asset kept this way survives until the catalog is regenerated, so removing an image from
+`appleTVImages` needs `npx expo prebuild --clean` to take effect.
 
 ### Layered app icons
 

@@ -12,6 +12,7 @@ import {
 } from "./testConstants";
 import {
   createBrandAssetsAsync,
+  existingBrandAssetsAsync,
   SourceImageJson,
   SourceBrandAssetsJson,
   tvosDeploymentTarget,
@@ -279,16 +280,94 @@ describe("appleTVSourceBrandAssets", () => {
     ]);
   });
 
-  test("throws when an app icon has neither an image nor layers", () => {
+  test("throws when an app icon is given nowhere", () => {
     expect(() =>
       appleTVSourceBrandAssets({ ...flatImages, icon: undefined }),
-    ).toThrow("One or more image paths not defined");
+    ).toThrow("No image or existing brand asset for App Icon - Large");
   });
 
-  test("still throws when a top shelf image is not defined", () => {
-    expect(() =>
-      appleTVSourceBrandAssets({ ...flatImages, topShelf: undefined }),
-    ).toThrow("One or more image paths not defined");
+  test("uses an app icon already in the catalog when none is given", () => {
+    const brandAssets = appleTVSourceBrandAssets(
+      { ...flatImages, icon: undefined },
+      [
+        {
+          filename: "App Icon - Large.imagestack",
+          role: "primary-app-icon",
+          size: "1280x768",
+          idiom: "tv",
+        },
+      ],
+    );
+    expect(brandAssets.assets[3]).toEqual({
+      existingFilename: "App Icon - Large.imagestack",
+      role: "primary-app-icon",
+      size: "1280x768",
+    });
+  });
+
+  test("leaves out a top shelf image that is given nowhere", () => {
+    const brandAssets = appleTVSourceBrandAssets({
+      ...flatImages,
+      topShelf: undefined,
+      topShelf2x: undefined,
+    });
+    expect(brandAssets.assets.map((asset) => asset.role)).toEqual([
+      "top-shelf-image-wide",
+      "primary-app-icon",
+      "primary-app-icon",
+    ]);
+  });
+
+  test("keeps a top shelf image already in the catalog", () => {
+    const brandAssets = appleTVSourceBrandAssets(
+      { ...flatImages, topShelf: undefined, topShelf2x: undefined },
+      [
+        {
+          filename: "My Top Shelf.imageset",
+          role: "top-shelf-image",
+          size: "1920x720",
+          idiom: "tv",
+        },
+      ],
+    );
+    expect(brandAssets.assets[0]).toEqual({
+      existingFilename: "My Top Shelf.imageset",
+      role: "top-shelf-image",
+      size: "1920x720",
+    });
+  });
+
+  test("ignores catalog assets whose directory is gone", async () => {
+    vol.fromJSON(
+      {
+        "TVAppIcon.brandassets/Contents.json": JSON.stringify({
+          assets: [
+            {
+              filename: "Top Shelf Image.imageset",
+              role: "top-shelf-image",
+              size: "1920x720",
+              idiom: "tv",
+            },
+            {
+              filename: "Gone.imageset",
+              role: "top-shelf-image-wide",
+              size: "2320x720",
+              idiom: "tv",
+            },
+          ],
+          info: { version: 1, author: "expo" },
+        }),
+        "TVAppIcon.brandassets/Top Shelf Image.imageset/Contents.json": "{}",
+      },
+      projectRoot,
+    );
+    const existingAssets = await existingBrandAssetsAsync(
+      projectRoot,
+      "TVAppIcon",
+    );
+    expect(existingAssets.map((asset) => asset.filename)).toEqual([
+      "Top Shelf Image.imageset",
+    ]);
   });
 
   test("throws when a layer image does not exist", () => {
