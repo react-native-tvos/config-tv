@@ -8,7 +8,7 @@ export type AppleTVImages = {
    */
   iconSmall2x: string;
   /**
-   * Path to 1280x760 image
+   * Path to 1280x768 image
    */
   icon: string;
   /**
