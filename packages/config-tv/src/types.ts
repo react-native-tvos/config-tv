@@ -1,32 +1,63 @@
+/**
+ * Paths to the images for the layers of one Apple TV app icon. tvOS shifts the layers
+ * apart when the icon is focused, which is what gives the icon its parallax effect.
+ */
+export type AppleTVIconLayers = {
+  /**
+   * Path to the front layer, normally the logo on a transparent background
+   */
+  front: string;
+  /**
+   * Path to the middle layer, if the icon has one
+   */
+  middle?: string;
+  /**
+   * Path to the back layer, normally the opaque background
+   */
+  back: string;
+};
+
 export type AppleTVImages = {
   /**
-   * Path to 400x240 image
+   * Path to 400x240 image, used for every layer
    */
-  iconSmall: string;
+  iconSmall?: string;
   /**
-   * Path to 800x480 image
+   * Paths to 400x240 images, one per layer. Takes precedence over `iconSmall`.
    */
-  iconSmall2x: string;
+  iconSmallLayers?: AppleTVIconLayers;
   /**
-   * Path to 1280x760 image
+   * Path to 800x480 image, used for every layer
    */
-  icon: string;
+  iconSmall2x?: string;
+  /**
+   * Paths to 800x480 images, one per layer. Takes precedence over `iconSmall2x`.
+   */
+  iconSmall2xLayers?: AppleTVIconLayers;
+  /**
+   * Path to 1280x768 image, used for every layer
+   */
+  icon?: string;
+  /**
+   * Paths to 1280x768 images, one per layer. Takes precedence over `icon`.
+   */
+  iconLayers?: AppleTVIconLayers;
   /**
    * Path to 1920x720 image
    */
-  topShelf: string;
+  topShelf?: string;
   /**
    * Path to 3840x1440 image
    */
-  topShelf2x: string;
+  topShelf2x?: string;
   /**
    * Path to 2320x720 image
    */
-  topShelfWide: string;
+  topShelfWide?: string;
   /**
    * Path to 4640x1440 image
    */
-  topShelfWide2x: string;
+  topShelfWide2x?: string;
 };
 
 export type ConfigData = {
@@ -82,9 +113,12 @@ export type ConfigData = {
    * If set, this is an object with the paths to images needed to construct the Apple TV icon and
    * top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode
    * project Image catalog, and the project updated to use the brand assets as the source for the app
-   * icons. If this property is set, all six image paths must be defined and the files must exist,
-   * or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid
-   * errors during Xcode compilation and on submission to the App Store or TestFlight.
+   * icons. Images may be left out: a brand asset with no image given here keeps the one
+   * already in the project's brand assets catalog. The two app icons are required, so an
+   * error will be thrown if one of them is in neither place. Every path given must point to
+   * an existing file, or an error will be thrown. The images need to be the exact sizes shown
+   * here, in order to avoid errors during Xcode compilation and on submission to the App
+   * Store or TestFlight.
    */
   appleTVImages?: AppleTVImages;
 };

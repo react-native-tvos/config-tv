@@ -70,14 +70,78 @@ _Plugin parameters_:
 - `androidTVRequired`: (optional boolean, default false) If set, the Android manifest will be configured for Android TV only (no Android mobile support). Specifically, the "uses-feature" tag for "android.software.leanback" will be set to "required=true".
 - `androidTVBanner`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV banner image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#banner . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable directories. **NOTE:** This does not apply to Fire TV and is instead set by the app store submission. See https://developer.amazon.com/docs/app-submission/appstore-details.html#firetvassets
 - `androidTVIcon`: (optional string) If set, this should be a path to an existing PNG file appropriate for an Android TV icon image. See https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines#launcher-icon . The Android manifest will be modified to reference this image, and the image will be copied into Android resource drawable and mipmap directories.
-- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. If this property is set, all image paths must be defined and the files must exist, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
+- `appleTVImages`: (optional object) If set, this is an object with the paths to images needed to construct the Apple TV icon and top shelf brand assets. The images will be used to construct a brand asset catalog in the Xcode project Image catalog, and the project updated to use the brand assets as the source for the app icons. Images may be left out; see [partial brand assets](#partial-brand-assets). Every path given must point to an existing file, or an error will be thrown. The images need to be the exact sizes shown here, in order to avoid errors during Xcode compilation and on submission to the App Store or TestFlight.
   - `icon`: (string) Path to a 1280x768 image
+  - `iconLayers`: (optional object) Paths to 1280x768 images, one per layer. Takes precedence over `icon`. See [layered app icons](#layered-app-icons)
   - `iconSmall`: (string) Path to a 400x240 image
+  - `iconSmallLayers`: (optional object) Paths to 400x240 images, one per layer. Takes precedence over `iconSmall`
   - `iconSmall2x`: (string) Path to a 800x480 image
+  - `iconSmall2xLayers`: (optional object) Paths to 800x480 images, one per layer. Takes precedence over `iconSmall2x`
   - `topShelf`: (string) Path to a 1920x720 image
   - `topShelf2x`: (string) Path to a 3840x1440 image
   - `topShelfWide`: (string) Path to a 2320x720 image
   - `topShelfWide2x`: (string) Path to a 4640x1440 image
+
+### Partial brand assets
+
+`appleTVImages` does not have to describe the whole catalog. For a brand asset it was given
+no image for, the plugin keeps the asset already in the project's brand assets, so an
+existing tvOS app can override just its app icon and keep the top shelf art it already
+ships.
+
+The two app icons are required: if one is neither given in `appleTVImages` nor already in
+the catalog, an error is thrown. A top shelf image in neither place is left unset.
+
+An asset kept this way survives until the catalog is regenerated, so removing an image from
+`appleTVImages` needs `npx expo prebuild --clean` to take effect.
+
+### Layered app icons
+
+An Apple TV app icon is made of up to three layers, which tvOS shifts apart when the icon is
+focused to give it a parallax effect. Passing a single image (`icon`, `iconSmall`,
+`iconSmall2x`) puts that same image in every layer, so the icon renders flat.
+
+To keep the parallax effect, pass the artwork for each layer instead. The front layer is
+normally the logo on a transparent background, and the back layer is the opaque background.
+The middle layer is optional; when no scale supplies one, a two layer icon is generated.
+Every layer must be the size documented for the icon it belongs to.
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "@react-native-tvos/config-tv",
+        {
+          "appleTVImages": {
+            "iconLayers": {
+              "front": "./assets/images/front-1280x768.png",
+              "back": "./assets/images/back-1280x768.png"
+            },
+            "iconSmallLayers": {
+              "front": "./assets/images/front-400x240.png",
+              "middle": "./assets/images/middle-400x240.png",
+              "back": "./assets/images/back-400x240.png"
+            },
+            "iconSmall2xLayers": {
+              "front": "./assets/images/front-800x480.png",
+              "middle": "./assets/images/middle-800x480.png",
+              "back": "./assets/images/back-800x480.png"
+            },
+            "topShelf": "./assets/images/myimage-tvos-1920x720.png",
+            "topShelf2x": "./assets/images/myimage-tvos-3840x1440.png",
+            "topShelfWide": "./assets/images/myimage-tvos-2320x720.png",
+            "topShelfWide2x": "./assets/images/myimage-tvos-4640x1440.png"
+          }
+        }
+      ]
+    ]
+  }
+}
+```
+
+Each app icon scale needs either its single image or its layers. Mixing the two is allowed:
+a scale left as a single image contributes that image to every layer.
 
 _Warning_:
 

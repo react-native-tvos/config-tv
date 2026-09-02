@@ -12,6 +12,7 @@ import {
 } from "./testConstants";
 import {
   createBrandAssetsAsync,
+  existingBrandAssetsAsync,
   SourceImageJson,
   SourceBrandAssetsJson,
   tvosDeploymentTarget,
@@ -22,6 +23,7 @@ import {
   setTVBanner,
   setTVIcon,
 } from "../withTVAndroidManifest";
+import { appleTVSourceBrandAssets } from "../withTVAppleIconImages";
 import { addTVPodfileModifications } from "../withTVPodfile";
 import { addTVSplashScreenModifications } from "../withTVSplashScreen";
 
@@ -147,6 +149,237 @@ describe("withTV iOS/tvOS tests", () => {
       { encoding: "utf-8" },
     );
     expect(appIconContents).toEqual("icon.png");
+  });
+});
+
+describe("appleTVSourceBrandAssets", () => {
+  const imageNames = [
+    "icon-1280x768.png",
+    "icon-400x240.png",
+    "icon-800x480.png",
+    "topShelf.png",
+    "topShelf2x.png",
+    "topShelfWide.png",
+    "topShelfWide2x.png",
+    "front-400x240.png",
+    "middle-400x240.png",
+    "back-400x240.png",
+  ];
+
+  const imagePath = (name: string) => join(projectRoot, "assets/images", name);
+
+  const flatImages = {
+    icon: imagePath("icon-1280x768.png"),
+    iconSmall: imagePath("icon-400x240.png"),
+    iconSmall2x: imagePath("icon-800x480.png"),
+    topShelf: imagePath("topShelf.png"),
+    topShelf2x: imagePath("topShelf2x.png"),
+    topShelfWide: imagePath("topShelfWide.png"),
+    topShelfWide2x: imagePath("topShelfWide2x.png"),
+  };
+
+  const imageStackNamed = (
+    brandAssets: SourceBrandAssetsJson,
+    name: string,
+  ) => {
+    const imageStack = brandAssets.assets.find(
+      (asset) => asset.imageStack?.name === name,
+    )?.imageStack;
+    if (!imageStack) {
+      throw new Error(`No image stack named ${name}`);
+    }
+    return imageStack;
+  };
+
+  beforeEach(() => {
+    vol.reset();
+    vol.fromJSON(
+      Object.fromEntries(
+        imageNames.map((name) => [`assets/images/${name}`, name]),
+      ),
+      projectRoot,
+    );
+  });
+
+  test("repeats a single icon image across all three layers", () => {
+    const iconSmall = imageStackNamed(
+      appleTVSourceBrandAssets(flatImages),
+      "App Icon - Small",
+    );
+    expect(iconSmall.sourceLayers.map((layer) => layer.name)).toEqual([
+      "Front",
+      "Middle",
+      "Back",
+    ]);
+    for (const layer of iconSmall.sourceLayers) {
+      expect(layer.sourceImages).toEqual([
+        { path: imagePath("icon-400x240.png"), scale: "1x" },
+        { path: imagePath("icon-800x480.png"), scale: "2x" },
+      ]);
+    }
+  });
+
+  test("gives each layer its own artwork when layers are set", () => {
+    const iconSmall = imageStackNamed(
+      appleTVSourceBrandAssets({
+        ...flatImages,
+        iconSmallLayers: {
+          front: imagePath("front-400x240.png"),
+          middle: imagePath("middle-400x240.png"),
+          back: imagePath("back-400x240.png"),
+        },
+      }),
+      "App Icon - Small",
+    );
+    expect(
+      iconSmall.sourceLayers.map((layer) => layer.sourceImages[0].path),
+    ).toEqual([
+      imagePath("front-400x240.png"),
+      imagePath("middle-400x240.png"),
+      imagePath("back-400x240.png"),
+    ]);
+  });
+
+  test("omits the middle layer when no scale supplies one", () => {
+    const layers = {
+      front: imagePath("front-400x240.png"),
+      back: imagePath("back-400x240.png"),
+    };
+    const iconSmall = imageStackNamed(
+      appleTVSourceBrandAssets({
+        ...flatImages,
+        iconSmall: undefined,
+        iconSmall2x: undefined,
+        iconSmallLayers: layers,
+        iconSmall2xLayers: layers,
+      }),
+      "App Icon - Small",
+    );
+    expect(iconSmall.sourceLayers.map((layer) => layer.name)).toEqual([
+      "Front",
+      "Back",
+    ]);
+  });
+
+  test("layers take precedence over the single image for the same scale", () => {
+    const iconSmall = imageStackNamed(
+      appleTVSourceBrandAssets({
+        ...flatImages,
+        iconSmallLayers: {
+          front: imagePath("front-400x240.png"),
+          middle: imagePath("middle-400x240.png"),
+          back: imagePath("back-400x240.png"),
+        },
+      }),
+      "App Icon - Small",
+    );
+    // iconSmall2x is still a single image, so it contributes to every layer
+    expect(iconSmall.sourceLayers[0].sourceImages).toEqual([
+      { path: imagePath("front-400x240.png"), scale: "1x" },
+      { path: imagePath("icon-800x480.png"), scale: "2x" },
+    ]);
+  });
+
+  test("throws when an app icon is given nowhere", () => {
+    expect(() =>
+      appleTVSourceBrandAssets({ ...flatImages, icon: undefined }),
+    ).toThrow("No image or existing brand asset for App Icon - Large");
+  });
+
+  test("uses an app icon already in the catalog when none is given", () => {
+    const brandAssets = appleTVSourceBrandAssets(
+      { ...flatImages, icon: undefined },
+      [
+        {
+          filename: "App Icon - Large.imagestack",
+          role: "primary-app-icon",
+          size: "1280x768",
+          idiom: "tv",
+        },
+      ],
+    );
+    expect(brandAssets.assets[3]).toEqual({
+      existingFilename: "App Icon - Large.imagestack",
+      role: "primary-app-icon",
+      size: "1280x768",
+    });
+  });
+
+  test("leaves out a top shelf image that is given nowhere", () => {
+    const brandAssets = appleTVSourceBrandAssets({
+      ...flatImages,
+      topShelf: undefined,
+      topShelf2x: undefined,
+    });
+    expect(brandAssets.assets.map((asset) => asset.role)).toEqual([
+      "top-shelf-image-wide",
+      "primary-app-icon",
+      "primary-app-icon",
+    ]);
+  });
+
+  test("keeps a top shelf image already in the catalog", () => {
+    const brandAssets = appleTVSourceBrandAssets(
+      { ...flatImages, topShelf: undefined, topShelf2x: undefined },
+      [
+        {
+          filename: "My Top Shelf.imageset",
+          role: "top-shelf-image",
+          size: "1920x720",
+          idiom: "tv",
+        },
+      ],
+    );
+    expect(brandAssets.assets[0]).toEqual({
+      existingFilename: "My Top Shelf.imageset",
+      role: "top-shelf-image",
+      size: "1920x720",
+    });
+  });
+
+  test("ignores catalog assets whose directory is gone", async () => {
+    vol.fromJSON(
+      {
+        "TVAppIcon.brandassets/Contents.json": JSON.stringify({
+          assets: [
+            {
+              filename: "Top Shelf Image.imageset",
+              role: "top-shelf-image",
+              size: "1920x720",
+              idiom: "tv",
+            },
+            {
+              filename: "Gone.imageset",
+              role: "top-shelf-image-wide",
+              size: "2320x720",
+              idiom: "tv",
+            },
+          ],
+          info: { version: 1, author: "expo" },
+        }),
+        "TVAppIcon.brandassets/Top Shelf Image.imageset/Contents.json": "{}",
+      },
+      projectRoot,
+    );
+    const existingAssets = await existingBrandAssetsAsync(
+      projectRoot,
+      "TVAppIcon",
+    );
+    expect(existingAssets.map((asset) => asset.filename)).toEqual([
+      "Top Shelf Image.imageset",
+    ]);
+  });
+
+  test("throws when a layer image does not exist", () => {
+    expect(() =>
+      appleTVSourceBrandAssets({
+        ...flatImages,
+        iconLayers: {
+          front: imagePath("front-1280x768.png"),
+          back: imagePath("back-1280x768.png"),
+        },
+      }),
+    ).toThrow(`No image found at path ${imagePath("front-1280x768.png")}`);
   });
 });
 

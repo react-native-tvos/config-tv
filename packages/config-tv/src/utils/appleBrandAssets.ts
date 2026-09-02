@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import { existsSync, promises as fs } from "fs";
 import path from "path";
 
 export type ContentsJsonImageIdiom = "tv";
@@ -69,6 +69,8 @@ export interface SourceBrandAssetJson {
   size: string;
   imageStack?: SourceImageStackJson;
   imageSet?: SourceImageSetJson;
+  /** Name of an asset already in the catalog, kept as is */
+  existingFilename?: string;
 }
 
 export interface SourceBrandAssetsJson {
@@ -174,6 +176,30 @@ export async function createImageStackAsync(
 }
 
 /**
+ * Reads the assets declared in an existing brand assets catalog. Assets whose directory
+ * is missing are skipped, since actool fails on a dangling reference.
+ */
+export async function existingBrandAssetsAsync(
+  destinationPath: string,
+  name: string,
+): Promise<ContentsJsonAsset[]> {
+  const brandAssetsPath = path.join(destinationPath, `${name}.brandassets`);
+  let contents: ContentsJson;
+  try {
+    contents = JSON.parse(
+      await fs.readFile(path.join(brandAssetsPath, "Contents.json"), "utf-8"),
+    );
+  } catch {
+    return [];
+  }
+  return (contents?.assets ?? []).filter(
+    (asset) =>
+      asset.filename !== undefined &&
+      existsSync(path.join(brandAssetsPath, asset.filename)),
+  );
+}
+
+/**
  * Creates a brand assets directory with its Contents.json and any assets
  */
 export async function createBrandAssetsAsync(
@@ -186,23 +212,22 @@ export async function createBrandAssetsAsync(
   );
   await writeContentsJsonAsync(brandAssetsPath, {
     assets: brandAssets.assets.map((brandAsset) => {
-      if (brandAsset.imageStack) {
-        return {
-          filename: `${brandAsset.imageStack.name}.imagestack`,
-          role: brandAsset.role,
-          size: brandAsset.size,
-          idiom: "tv",
-        };
-      } else if (brandAsset.imageSet) {
-        return {
-          filename: `${brandAsset.imageSet.name}.imageset`,
-          role: brandAsset.role,
-          size: brandAsset.size,
-          idiom: "tv",
-        };
-      } else {
+      const filename =
+        brandAsset.existingFilename ??
+        (brandAsset.imageStack
+          ? `${brandAsset.imageStack.name}.imagestack`
+          : brandAsset.imageSet
+            ? `${brandAsset.imageSet.name}.imageset`
+            : undefined);
+      if (!filename) {
         return {}; // Should never happen, but need this to keep Typescript happy
       }
+      return {
+        filename,
+        role: brandAsset.role,
+        size: brandAsset.size,
+        idiom: "tv" as const,
+      };
     }),
   });
   for (const asset of brandAssets.assets) {
