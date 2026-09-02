@@ -47,6 +47,33 @@ function layerImagesForScale(
   return {};
 }
 
+/** An icon scale needs either a single image, or at least the front and back layer images. */
+function isScaleDefined({ image, layers }: IconScale): boolean {
+  return Boolean(layers ? layers.front && layers.back : image);
+}
+
+/**
+ * tvOS composites each scale from its own layers, so a middle layer supplied for one scale only
+ * would render as a three layer icon on Apple TV 4K and a two layer one on Apple TV HD.
+ */
+function assertSameLayersForEveryScale(
+  iconScales: IconScale[],
+  option: string,
+): void {
+  const layersByScale = iconScales.map((iconScale) => ({
+    scale: iconScale.scale,
+    names: Object.keys(layerImagesForScale(iconScale)).join(", "),
+  }));
+  if (new Set(layersByScale.map(({ names }) => names)).size > 1) {
+    throw new Error(
+      `The layers of "${option}" must be the same for every scale: ` +
+        layersByScale
+          .map(({ scale, names }) => `${scale} has ${names}`)
+          .join("; "),
+    );
+  }
+}
+
 function sourceImages(
   scales: { scale: string; image?: string }[],
 ): SourceImageJson[] {
@@ -92,9 +119,7 @@ export function appleTVSourceBrandAssets(
 
   // An app icon scale can be given as a single image or as layers, but not neither
   const everyImageDefined =
-    [...iconSmallScales, ...iconLargeScales].every(
-      (iconScale) => iconScale.image ?? iconScale.layers,
-    ) &&
+    [...iconSmallScales, ...iconLargeScales].every(isScaleDefined) &&
     [
       images.topShelf,
       images.topShelf2x,
@@ -104,6 +129,8 @@ export function appleTVSourceBrandAssets(
   if (!everyImageDefined) {
     throw new Error(`One or more image paths not defined`);
   }
+
+  assertSameLayersForEveryScale(iconSmallScales, "iconSmall");
 
   const iconSmallSourceLayers = sourceLayersForIcon(iconSmallScales);
 
