@@ -112,6 +112,27 @@ export async function writeContentsJsonAsync(
 }
 
 /**
+ * Images keep their source file name when copied, so two different files that share one would
+ * overwrite each other and leave every scale pointing at whichever was copied last.
+ */
+function assertDistinctFileNames(
+  imageSetPath: string,
+  sourceImages: SourceImageJson[],
+): void {
+  const pathsByFileName = new Map<string, string>();
+  for (const image of sourceImages) {
+    const fileName = path.basename(image.path);
+    const existingPath = pathsByFileName.get(fileName);
+    if (existingPath && existingPath !== image.path) {
+      throw new Error(
+        `Two images copied into ${imageSetPath} would have the same file name: ${existingPath} and ${image.path}`,
+      );
+    }
+    pathsByFileName.set(fileName, image.path);
+  }
+}
+
+/**
  * Creates an image set directory with its Contents.json and any images
  */
 export async function createImageSetAsync(
@@ -119,6 +140,7 @@ export async function createImageSetAsync(
   imageSet: SourceImageSetJson,
 ) {
   const imageSetPath = path.join(destinationPath, `${imageSet.name}.imageset`);
+  assertDistinctFileNames(imageSetPath, imageSet.sourceImages);
   await writeContentsJsonAsync(imageSetPath, {
     images: imageSet.sourceImages.map((image: any) => ({
       filename: path.basename(image.path),
@@ -184,6 +206,9 @@ export async function createBrandAssetsAsync(
     destinationPath,
     `${brandAssets.name}.brandassets`,
   );
+  // A prebuild that does not use --clean keeps the previous catalog, and actool rejects layers
+  // and images that the new Contents.json no longer references.
+  await fs.rm(brandAssetsPath, { force: true, recursive: true });
   await writeContentsJsonAsync(brandAssetsPath, {
     assets: brandAssets.assets.map((brandAsset) => {
       if (brandAsset.imageStack) {

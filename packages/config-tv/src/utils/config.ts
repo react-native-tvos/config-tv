@@ -72,34 +72,3 @@ export function androidTVBanner(params: ConfigData): string | undefined {
 export function androidTVIcon(params: ConfigData): string | undefined {
   return params?.androidTVIcon;
 }
-
-export const appleTVImageTypes = [
-  "icon",
-  "iconSmall",
-  "iconSmall2x",
-  "topShelf",
-  "topShelf2x",
-  "topShelfWide",
-  "topShelfWide2x",
-];
-
-export function appleTVImagePathForType(params: ConfigData, imageType: string) {
-  switch (imageType) {
-    case "icon":
-      return params?.appleTVImages?.icon;
-    case "iconSmall":
-      return params?.appleTVImages?.iconSmall;
-    case "iconSmall2x":
-      return params?.appleTVImages?.iconSmall2x;
-    case "topShelf":
-      return params?.appleTVImages?.topShelf;
-    case "topShelf2x":
-      return params?.appleTVImages?.topShelf2x;
-    case "topShelfWide":
-      return params?.appleTVImages?.topShelfWide;
-    case "topShelfWide2x":
-      return params?.appleTVImages?.topShelfWide2x;
-    default:
-      return undefined;
-  }
-}
